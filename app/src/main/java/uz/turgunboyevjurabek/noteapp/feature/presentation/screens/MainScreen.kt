@@ -109,7 +109,6 @@ fun MainScreen(
                         modifier = Modifier
                             .size(35.dp)
                     )
-
                 }
             }
         },

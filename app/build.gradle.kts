@@ -110,4 +110,9 @@ dependencies {
      */
     implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
+    /**
+     * Coil
+     */
+    implementation("io.coil-kt:coil:2.3.0") // Core library
+    implementation("io.coil-kt:coil-compose:2.3.0") // for Jetpack Compose
 }

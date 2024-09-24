@@ -2,6 +2,7 @@ package uz.turgunboyevjurabek.noteapp.feature.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -18,32 +19,42 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
 
 @Composable
 fun NoteListUI(modifier: Modifier = Modifier,notes :Note) {
     Surface(
-        modifier=modifier
+        modifier= modifier
             .statusBarsPadding()
             .wrapContentSize(),
-        shadowElevation = 3.dp,
+        shadowElevation = 5.dp,
         shape = ShapeDefaults.ExtraLarge
     ) {
-        Column(
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Top,
+        ConstraintLayout(
             modifier = Modifier
                 .padding(10.dp)
         ) {
+            val (name,description)=createRefs()
             Text(
                 text = notes.name,
-                style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold),
+                modifier = modifier
+                    .constrainAs(name){
+                        start.linkTo(parent.start, margin = 7.dp)
+                        top.linkTo(parent.top, margin = 7.dp)
+                    }
             )
             Text(
                 text = notes.description,
                 style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Light),
                 maxLines = 3,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = modifier
+                    .constrainAs(description){
+                        start.linkTo(parent.start, margin = 7.dp)
+                        top.linkTo(name.bottom, margin = 7.dp)
+                    }
             )
         }
     }

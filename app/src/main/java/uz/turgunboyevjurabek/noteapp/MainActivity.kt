@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import dagger.hilt.android.AndroidEntryPoint
+import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.AuthScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.MainScreen
 import uz.turgunboyevjurabek.noteapp.ui.theme.NoteAppTheme
 
@@ -49,7 +50,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NoteAppTheme {
-                MainScreen(modifier = Modifier.fillMaxSize())
+//                MainScreen(modifier = Modifier.fillMaxSize())
+                AuthScreen(
+                    modifier = Modifier
+                    .fillMaxSize()
+                )
             }
         }
     }
