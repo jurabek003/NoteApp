@@ -115,4 +115,9 @@ dependencies {
      */
     implementation("io.coil-kt:coil:2.3.0") // Core library
     implementation("io.coil-kt:coil-compose:2.3.0") // for Jetpack Compose
+
+    /**
+     * Gson
+     */
+    implementation ("com.google.code.gson:gson:2.10.1")  // For serialization
 }

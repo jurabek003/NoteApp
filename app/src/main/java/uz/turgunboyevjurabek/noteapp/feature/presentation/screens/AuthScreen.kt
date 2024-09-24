@@ -1,7 +1,9 @@
 package uz.turgunboyevjurabek.noteapp.feature.presentation.screens
 
+import UserViewModel
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -28,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -38,16 +42,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import uz.turgunboyevjurabek.noteapp.R
+import uz.turgunboyevjurabek.noteapp.feature.domein.madels.User
+import uz.turgunboyevjurabek.noteapp.feature.presentation.state.ResultState
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AuthScreen(modifier: Modifier = Modifier) {
+fun AuthScreen(
+    modifier: Modifier = Modifier,
+    viewModel: UserViewModel
+)  {
+    val user by viewModel.userState.collectAsState()
+
     Scaffold {
         /**
          * Tanlangan rasmning Uri'sini saqlash uchun state
@@ -71,7 +85,7 @@ fun AuthScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center
         ) {
             var name by rememberSaveable {
-                mutableStateOf("")
+                mutableStateOf(viewModel.userState.value.toString())
             }
 
             Box(
@@ -98,7 +112,7 @@ fun AuthScreen(modifier: Modifier = Modifier) {
                         painter = rememberAsyncImagePainter(selectedImageUri),
                         contentDescription = null,
                         modifier = Modifier
-                            .border(0.dp, Color.Blue,ShapeDefaults.ExtraLarge)
+                            .border(0.dp, Color.Blue, ShapeDefaults.ExtraLarge)
                             .fillMaxSize(),
                         contentScale = ContentScale.Crop,
                     )
@@ -145,7 +159,11 @@ fun AuthScreen(modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .padding(horizontal = 50.dp),
 //                contentPadding = PaddingValues(horizontal = 20.dp),
-                onClick = { }
+                onClick = {
+                    if (name.isNotEmpty() && selectedImageUri.toString().isNotEmpty()){
+                        viewModel.saveUser(User(name,selectedImageUri.toString()))
+                    }
+                }
             ) {
                 Text(
                     text = "Saqlash",
@@ -154,10 +172,25 @@ fun AuthScreen(modifier: Modifier = Modifier) {
                         .padding(vertical = 5.dp)
                 )
             }
+
+
+            /**
+             * Status management
+             */
+            when(user){
+               is ResultState.Loading ->{
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                }
+                is ResultState.Success ->{
+                    Toast.makeText(LocalContext.current, "Success", Toast.LENGTH_SHORT).show()
+                }
+                is ResultState.Error ->{
+                    Toast.makeText(LocalContext.current, "Error", Toast.LENGTH_SHORT).show()
+                }
+                else-> Unit
+            }
+
         }
-        /**
-         *
-         */
     }
 }
 
@@ -165,6 +198,6 @@ fun AuthScreen(modifier: Modifier = Modifier) {
 @Composable
 private fun AuthScreenPreview() {
 
-    AuthScreen()
+//    AuthScreen()
 
 }

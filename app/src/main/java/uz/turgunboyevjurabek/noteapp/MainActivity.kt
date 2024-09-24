@@ -1,5 +1,6 @@
 package uz.turgunboyevjurabek.noteapp
 
+import UserViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import dagger.hilt.android.AndroidEntryPoint
+import uz.turgunboyevjurabek.noteapp.core.MyApp
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.AuthScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.MainScreen
 import uz.turgunboyevjurabek.noteapp.ui.theme.NoteAppTheme
@@ -51,9 +53,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             NoteAppTheme {
 //                MainScreen(modifier = Modifier.fillMaxSize())
+
+                val dataStore=(application as MyApp).userDataStore
+                val userViewModel=UserViewModel(dataStore)
                 AuthScreen(
                     modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                    viewModel =userViewModel
                 )
             }
         }
