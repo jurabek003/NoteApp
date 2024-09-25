@@ -42,6 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ModalBottomSheetUI
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.NoteListUI
@@ -50,8 +51,9 @@ import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.NoteViewModel
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen(
-    modifier: Modifier,
-    viewModel: NoteViewModel = hiltViewModel()
+    modifier: Modifier=Modifier,
+    viewModel: NoteViewModel = hiltViewModel(),
+    navHostController: NavHostController
 ) {
     val notes by viewModel.notes.collectAsState()
     var isSheetOpen by rememberSaveable {

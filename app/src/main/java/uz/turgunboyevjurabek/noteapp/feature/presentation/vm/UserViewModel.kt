@@ -4,6 +4,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +24,8 @@ class UserViewModel(
     private val gson = Gson()
 
     // Holatni boshqarish uchun StateFlow
-    private val _userState = MutableStateFlow<ResultState<User>>(ResultState.Loading)
-    val userState: StateFlow<ResultState<User>> = _userState.asStateFlow()
+    private val _userState = MutableStateFlow(User(null, null))
+    val userState: StateFlow<User> = _userState.asStateFlow()
 
     init {
         // Load user data on initialization
@@ -37,20 +38,13 @@ class UserViewModel(
      * Loads the User object from DataStore and updates the state.
      */
     private suspend fun loadUser() {
-        _userState.value = ResultState.Loading // Loading holatini o'rnatish
-        try {
-            dataStoreUser.data.map { preferences ->
-                val userJson = preferences[USER_KEY] ?: ""
-                if (userJson.isNotEmpty()) {
-                    gson.fromJson(userJson, User::class.java)
-                } else {
-                    User(null, null)
-                }
-            }.collect { savedUser ->
-                _userState.value = ResultState.Success(savedUser) // Success holati
+        dataStoreUser.data.map { preferences ->
+            val userJson = preferences[USER_KEY] ?: ""
+            gson.fromJson(userJson, User::class.java)
+        }.collect { savedUser ->
+            if (savedUser!=null){
+                _userState.value = savedUser // Success holati
             }
-        } catch (e: Exception) {
-            _userState.value = ResultState.Error("Failed to load user data") // Error holati
         }
     }
 
@@ -59,15 +53,19 @@ class UserViewModel(
      */
     fun saveUser(newUser: User) {
         viewModelScope.launch {
-            try {
-                _userState.value = ResultState.Loading // Saqlash paytida Loading holati
-                val userJson = gson.toJson(newUser)
-                dataStoreUser.edit { mutablePreferences ->
-                    mutablePreferences[USER_KEY] = userJson
-                }
-                _userState.value = ResultState.Success(newUser) // Muvaffaqiyatli saqlanganda Success holati
-            } catch (e: Exception) {
-                _userState.value = ResultState.Error("Failed to save user data: --> ${e.message}") // Xatolik holati
+            val userJson = gson.toJson(newUser)
+            dataStoreUser.edit { mutablePreferences ->
+                mutablePreferences[USER_KEY] = userJson
+            }
+            _userState.value = newUser // Muvaffaqiyatli saqlanganda Success holati
+        }
+    }
+
+    fun clearUser() {
+        viewModelScope.launch {
+            dataStoreUser.edit { mutablePreferences ->
+                mutablePreferences.clear()
+                _userState.value = User(null, null)
             }
         }
     }

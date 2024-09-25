@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.User
@@ -58,10 +59,11 @@ import uz.turgunboyevjurabek.noteapp.feature.presentation.state.ResultState
 @Composable
 fun AuthScreen(
     modifier: Modifier = Modifier,
-    viewModel: UserViewModel
+    viewModel: UserViewModel,
+    navHostController: NavHostController
 )  {
     val user by viewModel.userState.collectAsState()
-
+    val context=LocalContext.current
     Scaffold {
         /**
          * Tanlangan rasmning Uri'sini saqlash uchun state
@@ -85,7 +87,7 @@ fun AuthScreen(
             verticalArrangement = Arrangement.Center
         ) {
             var name by rememberSaveable {
-                mutableStateOf(viewModel.userState.value.toString())
+                mutableStateOf("")
             }
 
             Box(
@@ -116,13 +118,17 @@ fun AuthScreen(
                             .fillMaxSize(),
                         contentScale = ContentScale.Crop,
                     )
-                } else {
+                }
+                else {
                     // Agar rasm tanlanmagan bo'lsa, default rasm ko'rsatish
                     Image(
                         painter = painterResource(id = R.drawable.ic_camera),
                         contentDescription = null,
                         modifier = Modifier
-                            .wrapContentSize()
+                            .border(0.dp, Color.Blue, ShapeDefaults.ExtraLarge)
+                            .fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+
                     )
                 }
             }
@@ -158,9 +164,10 @@ fun AuthScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 50.dp),
-//                contentPadding = PaddingValues(horizontal = 20.dp),
                 onClick = {
                     if (name.isNotEmpty() && selectedImageUri.toString().isNotEmpty()){
+                        Toast.makeText(context, "saqlandi", Toast.LENGTH_SHORT).show()
+//                        viewModel.clearUser()
                         viewModel.saveUser(User(name,selectedImageUri.toString()))
                     }
                 }
@@ -177,18 +184,18 @@ fun AuthScreen(
             /**
              * Status management
              */
-            when(user){
-               is ResultState.Loading ->{
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
-                is ResultState.Success ->{
-                    Toast.makeText(LocalContext.current, "Success", Toast.LENGTH_SHORT).show()
-                }
-                is ResultState.Error ->{
-                    Toast.makeText(LocalContext.current, "Error", Toast.LENGTH_SHORT).show()
-                }
-                else-> Unit
-            }
+//            when(user){
+//               is ResultState.Loading ->{
+//                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+//                }
+//                is ResultState.Success ->{
+//                    Toast.makeText(LocalContext.current, "Success", Toast.LENGTH_SHORT).show()
+//                }
+//                is ResultState.Error ->{
+//                    Toast.makeText(LocalContext.current, "Error", Toast.LENGTH_SHORT).show()
+//                }
+//                else-> Unit
+//            }
 
         }
     }

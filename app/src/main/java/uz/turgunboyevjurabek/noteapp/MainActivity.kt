@@ -39,8 +39,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import uz.turgunboyevjurabek.noteapp.core.MyApp
+import uz.turgunboyevjurabek.noteapp.feature.presentation.navigation.MyNavigation
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.AuthScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.MainScreen
 import uz.turgunboyevjurabek.noteapp.ui.theme.NoteAppTheme
@@ -56,11 +58,8 @@ class MainActivity : ComponentActivity() {
 
                 val dataStore=(application as MyApp).userDataStore
                 val userViewModel=UserViewModel(dataStore)
-                AuthScreen(
-                    modifier = Modifier
-                    .fillMaxSize(),
-                    viewModel =userViewModel
-                )
+                val navController = rememberNavController()
+                MyNavigation(viewModel = userViewModel, navHostController = navController)
             }
         }
     }
