@@ -1,48 +1,27 @@
 package uz.turgunboyevjurabek.noteapp
 
+import SplashScreen
 import UserViewModel
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ShapeDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import uz.turgunboyevjurabek.noteapp.core.MyApp
-import uz.turgunboyevjurabek.noteapp.feature.presentation.navigation.MyNavigation
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.AuthScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.MainScreen
 import uz.turgunboyevjurabek.noteapp.ui.theme.NoteAppTheme
@@ -54,12 +33,52 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NoteAppTheme {
-//                MainScreen(modifier = Modifier.fillMaxSize())
+                // DataStore va ViewModel ni olish
+                val dataStore = (application as MyApp).userDataStore
+                val userViewModel = UserViewModel(dataStore)
+                val viewModel = userViewModel.userState.collectAsState()
 
-                val dataStore=(application as MyApp).userDataStore
-                val userViewModel=UserViewModel(dataStore)
+                // NavController ni yaratish
                 val navController = rememberNavController()
-                MyNavigation(viewModel = userViewModel, navHostController = navController)
+                var startDestination by remember { mutableStateOf(false) }
+                val scope=rememberCoroutineScope()
+                LaunchedEffect(viewModel.value) {
+                    scope.launch {
+                        startDestination = viewModel.value?.name != null && viewModel.value?.image != null
+                    }
+                }
+                // NavHost yordamida navigatsiya
+                NavHost(navController = navController, startDestination = "splash") {
+                    composable("splash") {
+                        SplashScreen(
+                            isLoggedIn = startDestination,
+                            onNavigateToMain = {
+                                navController.navigate("main") {
+                                    // Splash ekranidan keyin navigatsiya qilishda oldingi ekranlarni olib tashlaydi
+                                    popUpTo("splash") { inclusive = true }
+                                }
+                            },
+                            onNavigateToAuth = {
+                                navController.navigate("auth") {
+                                    popUpTo("splash") { inclusive = true }
+                                }
+                            },
+                            userViewModel=userViewModel
+                        )
+                    }
+                    composable("main") {
+                        MainScreen(
+                            _userViewModel = userViewModel,
+                            navHostController = navController
+                        )
+                    }
+                    composable("auth") {
+                        AuthScreen(
+                            viewModel = userViewModel,
+                            navHostController = navController
+                        )
+                    }
+                }
             }
         }
     }

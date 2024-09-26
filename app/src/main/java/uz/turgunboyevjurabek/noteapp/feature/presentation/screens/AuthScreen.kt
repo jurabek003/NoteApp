@@ -90,6 +90,11 @@ fun AuthScreen(
                 mutableStateOf("")
             }
 
+            Text(text = user?.name.toString())
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(text = user?.image.toString())
+            Spacer(modifier = Modifier.height(40.dp))
+
             Box(
                 modifier = Modifier
                     .size(100.dp)

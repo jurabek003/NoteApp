@@ -10,10 +10,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.User
-import uz.turgunboyevjurabek.noteapp.feature.presentation.state.ResultState
 import javax.inject.Inject
 
 class UserViewModel(
@@ -24,28 +25,34 @@ class UserViewModel(
     private val gson = Gson()
 
     // Holatni boshqarish uchun StateFlow
-    private val _userState = MutableStateFlow(User(null, null))
-    val userState: StateFlow<User> = _userState.asStateFlow()
+    private val _userState = MutableStateFlow<User?>(null) // Null holati
+    val userState: StateFlow<User?> = _userState.asStateFlow()
 
     init {
-        // Load user data on initialization
-        viewModelScope.launch {
-            loadUser()
-        }
+        loadUser()
     }
 
     /**
      * Loads the User object from DataStore and updates the state.
      */
-    private suspend fun loadUser() {
-        dataStoreUser.data.map { preferences ->
-            val userJson = preferences[USER_KEY] ?: ""
-            gson.fromJson(userJson, User::class.java)
-        }.collect { savedUser ->
-            if (savedUser!=null){
-                _userState.value = savedUser // Success holati
+    private fun loadUser() {
+        viewModelScope.launch {
+            dataStoreUser.data.collect { preferences ->
+                val userJson = preferences[USER_KEY] ?: return@collect
+                val savedUser = gson.fromJson(userJson, User::class.java)
+                _userState.value = savedUser ?: User(null, null) // Xatolik holati
             }
         }
+    }
+
+    /**
+     * Retrieves the User object from StateFlow.
+     */
+    suspend fun getUser(): User? {
+        return dataStoreUser.data.map { preferences ->
+            val userJson = preferences[USER_KEY] ?: return@map null
+            gson.fromJson(userJson, User::class.java)
+        }.firstOrNull() // Birinchi qiymatni olish
     }
 
     /**
@@ -61,12 +68,15 @@ class UserViewModel(
         }
     }
 
+    /**
+     * Clears the User object from DataStore.
+     */
     fun clearUser() {
         viewModelScope.launch {
             dataStoreUser.edit { mutablePreferences ->
                 mutablePreferences.clear()
-                _userState.value = User(null, null)
             }
+            _userState.value = null // Foydalanuvchi tozalanganidan keyin null
         }
     }
 }
