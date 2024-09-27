@@ -3,10 +3,14 @@
 package uz.turgunboyevjurabek.noteapp.feature.presentation.screens
 
 import UserViewModel
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -65,20 +69,24 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
+import coil.util.CoilUtils
+import okhttp3.internal.wait
 import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ModalBottomSheetUI
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.NoteListUI
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.NoteViewModel
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen(
@@ -92,10 +100,13 @@ fun MainScreen(
     var isSheetOpen by rememberSaveable {
         mutableStateOf(false)
     }
-    val userViewModel=_userViewModel.userState.collectAsState()
 
-//    val imagePath = getFilePathFromContentUri(context, Uri.parse(userViewModel.value.image))
-//    println("Real File Path: $imagePath")
+    val userViewModel=_userViewModel.userState.collectAsState()
+    println("rasm -> ${userViewModel.value?.image}")
+
+    val contentResolver = context.contentResolver
+//    val inputStream = userViewModel.value?.image?.let { contentResolver.openInputStream(it.toUri()) }
+//    val bitmap = BitmapFactory.decodeStream(inputStream)
 
     Scaffold(
         modifier = Modifier
@@ -126,30 +137,42 @@ fun MainScreen(
                                         ),
                                     horizontalArrangement = Arrangement.SpaceAround,
                                     verticalAlignment = Alignment.CenterVertically
-
                                 ) {
                                     val imageLoader = ImageLoader.Builder(context)
-                                        .memoryCachePolicy(CachePolicy.DISABLED) // Keshlashni o'chirib qo'yish
+                                        .error(R.drawable.ic_launcher_foreground)
+                                        .crossfade(true)
+                                        .placeholder(R.drawable.ic_image)
+                                        .memoryCachePolicy(CachePolicy.ENABLED) //Keshlash
                                         .build()
                                     Text(
                                         text = "Hello, ${userViewModel.value?.name}",
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = MaterialTheme.typography.displayMedium.fontSize
+                                        fontFamily = FontFamily.Serif,
+                                        fontSize = MaterialTheme.typography.displaySmall.fontSize
                                     )
-                                    Image(painter = rememberAsyncImagePainter(
-                                        model = Uri.parse(userViewModel.value?.image),
-                                        imageLoader=imageLoader
-                                        ),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(50.dp)
-                                        .clip(CircleShape)
-                                        .border(
-                                            border = BorderStroke(1.5.dp, color = Color.Red),
-                                            shape = CircleShape
-                                        ),
-                                        contentScale = ContentScale.Crop
-                                    )
+                                    val contentResolver = context.contentResolver
+                                    val imageUri = userViewModel.value?.image?.toUri()
+                                    if ( imageUri != null ){
+                                            Image(painter = rememberAsyncImagePainter(
+                                                model = try {
+                                                    imageUri
+                                                }catch (e:SecurityException){
+                                                    e.printStackTrace()
+                                                    Toast.makeText(context, "Faylga kirish uchun ruxsat kerak", Toast.LENGTH_SHORT).show()
+                                                },
+                                                imageLoader=imageLoader
+                                            ),
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(50.dp)
+                                                    .clip(CircleShape)
+                                                    .border(
+                                                        border = BorderStroke(1.5.dp, color = Color.Red),
+                                                        shape = CircleShape
+                                                    ),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
                                 }
                                 Spacer(modifier = Modifier.height(20.dp))
                             }
@@ -175,9 +198,6 @@ fun MainScreen(
                         }
                     }
                 }
-                /**
-                 *
-                 */
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Fixed(2),
                     verticalItemSpacing = (-15).dp,
@@ -185,7 +205,12 @@ fun MainScreen(
                     modifier = modifier
                 ) {
                     items(notes.size) { note ->
-                        NoteListUI(notes = notes[note])
+                        NoteListUI(
+                            notes = notes[note],
+                            onClick = {notes->
+                                navHostController.navigate("selectedNote")
+                            }
+                        )
                     }
                 }
 
@@ -259,13 +284,4 @@ fun MainScreen(
             }
         }
     )
-}
-fun getFilePathFromContentUri(context: Context, contentUri: Uri): String? {
-    val filePath: String?
-    val cursor = context.contentResolver.query(contentUri, null, null, null, null)
-    cursor?.moveToFirst().let {
-        filePath = cursor?.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA))
-        cursor?.close()
-    }
-    return filePath
 }

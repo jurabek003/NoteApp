@@ -23,8 +23,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
 
 @Composable
-fun NoteListUI(modifier: Modifier = Modifier,notes :Note) {
+fun NoteListUI(modifier: Modifier = Modifier,notes:Note,onClick:(Note)->Unit) {
     Surface(
+        onClick = {
+            onClick(notes)
+        },
         modifier= modifier
             .statusBarsPadding()
             .wrapContentSize(),
@@ -64,6 +67,6 @@ fun NoteListUI(modifier: Modifier = Modifier,notes :Note) {
 @Composable
 fun NoteListUIPreview(){
     val note=Note(0,"Mening birinchi noteim","Assalomu alaykum Bu mening birinchi notim")
-    NoteListUI(notes = note)
+//    NoteListUI(notes = note)
 }
         
