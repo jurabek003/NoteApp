@@ -84,24 +84,26 @@ import coil.request.CachePolicy
 import coil.util.CoilUtils
 import okhttp3.internal.wait
 import uz.turgunboyevjurabek.noteapp.R
+import uz.turgunboyevjurabek.noteapp.core.utils.NoteObj
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ModalBottomSheetUI
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.NoteListUI
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.NoteViewModel
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen(
-    modifier: Modifier=Modifier,
+    modifier: Modifier = Modifier,
     viewModel: NoteViewModel = hiltViewModel(),
     _userViewModel: UserViewModel,
     navHostController: NavHostController
 ) {
-    val context= LocalContext.current
+    val context = LocalContext.current
     val notes by viewModel.notes.collectAsState()
     var isSheetOpen by rememberSaveable {
         mutableStateOf(false)
     }
 
-    val userViewModel=_userViewModel.userState.collectAsState()
+    val userViewModel = _userViewModel.userState.collectAsState()
     println("rasm -> ${userViewModel.value?.image}")
 
     val contentResolver = context.contentResolver
@@ -113,78 +115,83 @@ fun MainScreen(
             .fillMaxSize(),
         content = {
             Column {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(unbounded = true)
-                            .background(Color.Transparent),
-                        color = MaterialTheme.colorScheme.surface,
-                        contentColor = contentColorFor(MaterialTheme.colorScheme.surface),
-                        shape = ShapeDefaults.ExtraLarge,
-                        shadowElevation = 8.dp,
-                        content =  {
-                            Column {
-                                Spacer(modifier = Modifier.height(20.dp))
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(top = 50.dp)
-                                        .clip(
-                                            RoundedCornerShape(
-                                                bottomEnd = 30.dp,
-                                                bottomStart = 30.dp
-                                            )
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(unbounded = true)
+                        .background(Color.Transparent),
+                    color = MaterialTheme.colorScheme.surface,
+                    contentColor = contentColorFor(MaterialTheme.colorScheme.surface),
+                    shape = ShapeDefaults.ExtraLarge,
+                    shadowElevation = 8.dp,
+                    content = {
+                        Column {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(top = 50.dp)
+                                    .clip(
+                                        RoundedCornerShape(
+                                            bottomEnd = 30.dp,
+                                            bottomStart = 30.dp
+                                        )
+                                    ),
+                                horizontalArrangement = Arrangement.SpaceAround,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                val imageLoader = ImageLoader.Builder(context)
+                                    .error(R.drawable.ic_launcher_foreground)
+                                    .crossfade(true)
+                                    .placeholder(R.drawable.ic_image)
+                                    .memoryCachePolicy(CachePolicy.ENABLED) //Keshlash
+                                    .build()
+                                Text(
+                                    text = "Hello, ${userViewModel.value?.name}",
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontFamily = FontFamily.Serif,
+                                    fontSize = MaterialTheme.typography.displaySmall.fontSize
+                                )
+                                val contentResolver = context.contentResolver
+                                val imageUri = userViewModel.value?.image?.toUri()
+                                if (imageUri != null) {
+                                    Image(
+                                        painter = rememberAsyncImagePainter(
+                                            model = try {
+                                                imageUri
+                                            } catch (e: SecurityException) {
+                                                e.printStackTrace()
+                                                Toast.makeText(
+                                                    context,
+                                                    "Faylga kirish uchun ruxsat kerak",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            },
+                                            imageLoader = imageLoader
                                         ),
-                                    horizontalArrangement = Arrangement.SpaceAround,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    val imageLoader = ImageLoader.Builder(context)
-                                        .error(R.drawable.ic_launcher_foreground)
-                                        .crossfade(true)
-                                        .placeholder(R.drawable.ic_image)
-                                        .memoryCachePolicy(CachePolicy.ENABLED) //Keshlash
-                                        .build()
-                                    Text(
-                                        text = "Hello, ${userViewModel.value?.name}",
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontFamily = FontFamily.Serif,
-                                        fontSize = MaterialTheme.typography.displaySmall.fontSize
-                                    )
-                                    val contentResolver = context.contentResolver
-                                    val imageUri = userViewModel.value?.image?.toUri()
-                                    if ( imageUri != null ){
-                                            Image(painter = rememberAsyncImagePainter(
-                                                model = try {
-                                                    imageUri
-                                                }catch (e:SecurityException){
-                                                    e.printStackTrace()
-                                                    Toast.makeText(context, "Faylga kirish uchun ruxsat kerak", Toast.LENGTH_SHORT).show()
-                                                },
-                                                imageLoader=imageLoader
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .clip(CircleShape)
+                                            .border(
+                                                border = BorderStroke(1.5.dp, color = Color.Red),
+                                                shape = CircleShape
                                             ),
-                                                contentDescription = null,
-                                                modifier = Modifier
-                                                    .size(50.dp)
-                                                    .clip(CircleShape)
-                                                    .border(
-                                                        border = BorderStroke(1.5.dp, color = Color.Red),
-                                                        shape = CircleShape
-                                                    ),
-                                                contentScale = ContentScale.Crop
-                                            )
-                                        }
+                                        contentScale = ContentScale.Crop
+                                    )
                                 }
-                                Spacer(modifier = Modifier.height(20.dp))
                             }
+                            Spacer(modifier = Modifier.height(20.dp))
                         }
-                    )
+                    }
+                )
                 Spacer(modifier = Modifier.height(20.dp))
                 LazyRow(
                     modifier = Modifier,
                 ) {
-                    items(20){
+                    items(20) {
                         Surface(
-                            modifier= Modifier
+                            modifier = Modifier
                                 .padding(PaddingValues(horizontal = 5.dp, vertical = 15.dp))
                                 .wrapContentSize(),
                             shape = ShapeDefaults.ExtraLarge,
@@ -207,7 +214,12 @@ fun MainScreen(
                     items(notes.size) { note ->
                         NoteListUI(
                             notes = notes[note],
-                            onClick = {notes->
+                            onClick = { notes ->
+                                NoteObj.apply {
+                                    noteID = notes.id
+                                    noteName = notes.name
+                                    noteDescription = notes.description
+                                }
                                 navHostController.navigate("selectedNote")
                             }
                         )
@@ -263,7 +275,7 @@ fun MainScreen(
                     modifier = Modifier
                         .padding(bottom = 50.dp),
                     onClick = {
-                        isSheetOpen=true
+                        isSheetOpen = true
                     },
                     shape = CircleShape,
                     elevation = FloatingActionButtonDefaults.elevation(0.dp),

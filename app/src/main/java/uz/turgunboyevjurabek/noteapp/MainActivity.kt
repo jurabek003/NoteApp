@@ -31,6 +31,7 @@ import uz.turgunboyevjurabek.noteapp.core.MyApp
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.AuthScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.MainScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.SelectedNoteScreen
+import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.IsEditNoteViewModel
 import uz.turgunboyevjurabek.noteapp.ui.theme.NoteAppTheme
 
 @AndroidEntryPoint
@@ -52,6 +53,8 @@ class MainActivity : ComponentActivity() {
                 val dataStore = (application as MyApp).userDataStore
                 val userViewModel = UserViewModel(dataStore)
                 val viewModel = userViewModel.userState.collectAsState()
+
+                val isEditNoteViewModel=IsEditNoteViewModel()
 
                 // NavController ni yaratish
                 val navController = rememberNavController()
@@ -94,7 +97,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("selectedNote") {
-                        SelectedNoteScreen(navController)
+                        SelectedNoteScreen(navController, isEditNoteViewModel = isEditNoteViewModel)
                     }
                 }
             }

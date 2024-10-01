@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
 
 @Dao
 interface NoteDao {
@@ -22,5 +23,8 @@ interface NoteDao {
 
     @Update
     suspend fun editNote(noteEntity: NoteEntity)
+
+    @Query("SELECT * FROM MyNotes WHERE id = :noteId")
+    fun getNoteByIdFlow(noteId: Int): Flow<Note?>
 
 }

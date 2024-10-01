@@ -16,6 +16,10 @@ class NoteRepositoryImpl(private val noteDao: NoteDao) : NoteRepository {
         }
     }
 
+    override fun getNoteById(noteId: Int): Flow<Note?> {
+        return noteDao.getNoteByIdFlow(noteId)
+    }
+
     override suspend fun insertNote(note: Note) {
         return noteDao.insertNote(note.toNoteEntity())
     }
@@ -23,4 +27,9 @@ class NoteRepositoryImpl(private val noteDao: NoteDao) : NoteRepository {
     override suspend fun deleteNote(note: Note) {
         return noteDao.deleteNote(note.toNoteEntity())
     }
+
+    override suspend fun updateNote(note: Note) {
+        noteDao.editNote(note.toNoteEntity())
+    }
+
 }
