@@ -24,7 +24,10 @@ interface NoteDao {
     @Update
     suspend fun editNote(noteEntity: NoteEntity)
 
-    @Query("SELECT * FROM MyNotes WHERE id = :noteId")
-    fun getNoteByIdFlow(noteId: Int): Flow<Note?>
+    @Query("select * from MyNotes where id = :noteId")
+    fun getNoteByIdFlow(noteId: Int): Flow<NoteEntity?>
+
+    @Query("select * from MyNotes where isDelete = :isDelete")
+    fun getIsDeletesNote(isDelete: Boolean):Flow<List<NoteEntity?>>
 
 }

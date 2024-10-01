@@ -150,7 +150,7 @@ fun SelectedNoteScreen(
                         exit = slideOutVertically(
                             animationSpec = tween(1000),
                             targetOffsetY = { _ -> 100f.toInt() })
-                    ) {
+                    ){
                         IconButton(onClick = {
                             isEditNoteViewModel.setIsEditNote(false)
                         }) {
@@ -183,8 +183,11 @@ fun SelectedNoteScreen(
                         exit = slideOutVertically(
                             animationSpec = tween(1000),
                             targetOffsetY = { _ -> 100f.toInt() })
-                    ) {
-                        IconButton(onClick = {}) {
+                    ){
+                        IconButton(onClick = {
+                            note?.let { viewModel.updateNote(note = Note(id = it.id, name = it.name, description = it.description, isDelete = true) ) }
+                            navHostController.popBackStack()
+                        }) {
                             Icon(imageVector = Icons.Default.Delete, contentDescription = null)
                         }
                     }

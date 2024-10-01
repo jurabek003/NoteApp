@@ -14,6 +14,7 @@ import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.DeleteNoteUseCase
 import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.GetAllNotesUseCase
 import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.GetNoteByIdUseCase
 import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.InsertNoteUseCase
+import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.IsDeleteUseCase
 import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.UpdateNoteUseCase
 import javax.inject.Inject
 
@@ -23,13 +24,17 @@ class NoteViewModel @Inject constructor(
     private val insertNoteUseCase: InsertNoteUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
-    private val getNoteByIdUseCase: GetNoteByIdUseCase
+    private val getNoteByIdUseCase: GetNoteByIdUseCase,
+    private val getIsDeleteUseCase: IsDeleteUseCase
 ):ViewModel() {
     private val _notes = MutableStateFlow<List<Note>>(emptyList())
     val notes: StateFlow<List<Note>> = _notes
 
     private val _note = MutableStateFlow<Note?>(null)
     val note: StateFlow<Note?> = _note.asStateFlow()
+
+    private val _isDeleteNote=MutableStateFlow<List<Note?>>(emptyList())
+    val isDeleteNote=_isDeleteNote.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -63,6 +68,16 @@ class NoteViewModel @Inject constructor(
                 _note.value=result
             }
         }
+    }
+
+    fun getIsDeleteNotes(boolean: Boolean){
+        viewModelScope.launch {
+            getIsDeleteUseCase(boolean).collect{result->
+                _isDeleteNote.value=result
+            }
+        }
 
     }
+
+
 }

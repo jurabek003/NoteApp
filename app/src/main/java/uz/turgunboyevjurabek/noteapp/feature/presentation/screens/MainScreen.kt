@@ -208,7 +208,7 @@ fun MainScreen(
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Fixed(2),
                     verticalItemSpacing = (-15).dp,
-                    horizontalArrangement = Arrangement.spacedBy(15.dp),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
                     modifier = modifier
                 ) {
                     items(notes.size) { note ->
@@ -284,7 +284,9 @@ fun MainScreen(
                     Icon(imageVector = Icons.Default.Add, contentDescription = null)
                 }
                 IconButton(
-                    onClick = { },
+                    onClick = {
+                        navHostController.navigate("isDelete")
+                    },
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,

@@ -7,7 +7,8 @@ fun NoteEntity.toNote(): Note {
     return Note(
         id = this.id,
         name = this.name,
-        description = this.description
+        description = this.description,
+        isDelete=this.isDelete
     )
 }
 
@@ -15,6 +16,7 @@ fun Note.toNoteEntity(): NoteEntity {
     return NoteEntity(
         id = this.id,
         name = this.name,
-        description = this.description
+        description = this.description,
+        isDelete=this.isDelete
     )
 }

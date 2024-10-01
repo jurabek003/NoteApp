@@ -2,6 +2,7 @@ package uz.turgunboyevjurabek.noteapp.feature.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -13,6 +14,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,13 +33,14 @@ fun NoteListUI(modifier: Modifier = Modifier,notes:Note,onClick:(Note)->Unit) {
         },
         modifier= modifier
             .statusBarsPadding()
-            .wrapContentSize(),
+            .wrapContentSize()
+            .padding( PaddingValues(horizontal = 8.dp)),
         shadowElevation = 5.dp,
         shape = ShapeDefaults.ExtraLarge
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .padding(10.dp)
+                .padding(PaddingValues(10.dp))
         ) {
             val (name,description)=createRefs()
             Text(
@@ -51,7 +55,7 @@ fun NoteListUI(modifier: Modifier = Modifier,notes:Note,onClick:(Note)->Unit) {
             Text(
                 text = notes.description,
                 style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Light),
-                maxLines = 3,
+                maxLines = 5,
                 overflow = TextOverflow.Ellipsis,
                 modifier = modifier
                     .constrainAs(description){

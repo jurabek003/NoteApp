@@ -29,6 +29,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import uz.turgunboyevjurabek.noteapp.core.MyApp
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.AuthScreen
+import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.IsDeleteNotesScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.MainScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.SelectedNoteScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.IsEditNoteViewModel
@@ -40,13 +41,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // Ruxsatlarni tekshirish va so'rash
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), 100)
-            }
-        }
-
         setContent {
             NoteAppTheme {
                 // DataStore va ViewModel ni olish
@@ -54,15 +48,16 @@ class MainActivity : ComponentActivity() {
                 val userViewModel = UserViewModel(dataStore)
                 val viewModel = userViewModel.userState.collectAsState()
 
-                val isEditNoteViewModel=IsEditNoteViewModel()
+                val isEditNoteViewModel = IsEditNoteViewModel()
 
                 // NavController ni yaratish
                 val navController = rememberNavController()
                 var startDestination by remember { mutableStateOf(false) }
-                val scope=rememberCoroutineScope()
+                val scope = rememberCoroutineScope()
                 LaunchedEffect(viewModel.value) {
                     scope.launch {
-                        startDestination = viewModel.value?.name != null && viewModel.value?.image != null
+                        startDestination =
+                            viewModel.value?.name != null && viewModel.value?.image != null
                     }
                 }
                 // NavHost yordamida navigatsiya
@@ -81,7 +76,7 @@ class MainActivity : ComponentActivity() {
                                     popUpTo("splash") { inclusive = true }
                                 }
                             },
-                            userViewModel=userViewModel
+                            userViewModel = userViewModel
                         )
                     }
                     composable("main") {
@@ -99,25 +94,13 @@ class MainActivity : ComponentActivity() {
                     composable("selectedNote") {
                         SelectedNoteScreen(navController, isEditNoteViewModel = isEditNoteViewModel)
                     }
+                    composable("isDelete") {
+                        IsDeleteNotesScreen(navHostController = navController)
+                    }
                 }
             }
         }
 
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 100) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Ruxsat berildi", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Ruxsat rad etildi", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 }
 
