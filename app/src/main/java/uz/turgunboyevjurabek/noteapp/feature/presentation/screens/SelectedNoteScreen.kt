@@ -235,7 +235,6 @@ fun EditNoteScreen(
     var description by rememberSaveable {
         mutableStateOf(note.description)
     }
-
     LaunchedEffect(isEditView.value) {
         when (isEditView.value) {
             false -> {

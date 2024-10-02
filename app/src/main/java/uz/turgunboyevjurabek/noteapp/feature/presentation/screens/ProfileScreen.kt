@@ -4,6 +4,14 @@ package uz.turgunboyevjurabek.noteapp.feature.presentation.screens
 
 import UserViewModel
 import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.background
@@ -33,27 +41,35 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShapeDefaults
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -84,22 +100,39 @@ import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.core.MyApp
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.User
+import uz.turgunboyevjurabek.noteapp.feature.presentation.components.navigation_anim.myEnterTransition
+import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.IsEditProfileViewModel
 import uz.turgunboyevjurabek.noteapp.ui.theme.NoteAppTheme
 
 @SuppressLint("StateFlowValueCalledInComposition", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ProfileScreen(
     navHostController: NavHostController,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    isEditProfileViewModel: IsEditProfileViewModel = viewModel<IsEditProfileViewModel>()
 ) {
+    val scope= rememberCoroutineScope()
+
     val shadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    val editProfile = isEditProfileViewModel.editProfile.collectAsState()
+    var isEdit by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(editProfile.value) {
+        isEdit = editProfile.value
+    }
+
     Scaffold(
         topBar = {
-            LargeTopAppBar(
+            TopAppBar(
                 modifier = Modifier
                     .shadow(
                         elevation = 5.dp,
@@ -108,32 +141,105 @@ fun ProfileScreen(
                     ),
                 scrollBehavior = scrollBehavior,
                 title = {
-                Text(
-                    text = "ProfileScreen",
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif
-                )
-            },
+                    AnimatedVisibility(
+                        visible = !isEdit,
+                        enter = slideInVertically(
+                            tween(700),
+                            initialOffsetY = { _ -> 200}
+                        ),
+                        exit = slideOutVertically(
+                            tween(600),
+                            targetOffsetY = { _ -> 200}
+                        ),
+                        content = {
+                            Text(
+                                text = "ProfileScreen",
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif
+                            )
+                        }
+                    )
+                    AnimatedVisibility(
+                        visible = isEdit,
+                        enter = slideInVertically(
+                            tween(700),
+                            initialOffsetY = { _ -> 100}
+                        ),
+                        exit = slideOutVertically(
+                            tween(600),
+                            targetOffsetY = { _ -> 100}
+                        ),
+                        content = {
+                            Text(
+                                text = "EditProfileScreen",
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif
+                            )
+                        }
+                    )
+
+                },
                 navigationIcon = {
-                    IconButton(onClick = {  }) {
+                    IconButton(onClick = {
+                        navHostController.popBackStack()
+                    }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
                     }
+                },
+                actions = {
+                    AnimatedVisibility(
+                        visible = !isEdit,
+                        enter = slideInVertically(),
+                        exit = slideOutVertically(),
+                        content = {
+                            IconButton(onClick = {
+                                isEditProfileViewModel.setIsEditProfile(true)
+                            }) {
+                                Icon(imageVector = Icons.Default.Edit, contentDescription = null)
+                            }
+                        }
+                    )
+                    AnimatedVisibility(
+                        visible = isEdit,
+                        enter = slideInVertically(),
+                        exit = slideOutVertically(),
+                        content = {
+                            IconButton(onClick = {
+                                isEditProfileViewModel.setIsEditProfile(false)
+                            }) {
+                                Icon(imageVector = Icons.Default.Done, contentDescription = null)
+                            }
+                        }
+                    )
+
                 }
             )
         },
-    ){innerPadding->
-        val scrollState= rememberScrollState()
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .verticalScroll(state = scrollState),
-            verticalArrangement = Arrangement.Center
-        ) {
-            EditProfileScreen(userViewModel = userViewModel)
+        content ={
+            val scrollState = rememberScrollState()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .verticalScroll(state = scrollState),
+            ) {
+                AnimatedVisibility(visible = !isEdit) {
+                    DefaultProfileScreen(
+                        userViewModel = userViewModel,
+                        navHostController = navHostController,
+                        isEditProfileViewModel = isEditProfileViewModel
+                    )
+                }
+                AnimatedVisibility(visible = isEdit) {
+                    EditProfileScreen(
+                        user = User(userViewModel.userState.value?.name,userViewModel.userState.value?.image),
+                        isEditProfileViewModel = isEditProfileViewModel,
+                        userViewModel = userViewModel
+                    )
+                }
+            }
         }
-    }
+    )
 
 }
 
@@ -141,9 +247,9 @@ fun ProfileScreen(
 @Composable
 fun DefaultProfileScreen(
     userViewModel: UserViewModel,
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    isEditProfileViewModel: IsEditProfileViewModel
 ) {
-
     val userState = userViewModel.userState.collectAsState()
 
     val user = userViewModel.userState.value
@@ -154,7 +260,7 @@ fun DefaultProfileScreen(
     ) {
         val (profileImage, surface, navigationIcon, editIcon) = createRefs()
         val imageLoading = ImageLoader.Builder(LocalContext.current)
-            .crossfade(1000)
+            .crossfade(800)
             .placeholder(R.drawable.ic_account)
             .error(R.drawable.ic_launcher_foreground)
             .build()
@@ -167,62 +273,26 @@ fun DefaultProfileScreen(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(fraction = 0.4f)
                 .constrainAs(profileImage) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
         )
-        IconButton(
-            onClick = {
-                navHostController.popBackStack()
-            },
-            modifier = Modifier
-                .size(40.dp)
-                .constrainAs(navigationIcon) {
-                    top.linkTo(parent.top, margin = 30.dp)
-                    start.linkTo(parent.start, margin = 10.dp)
-                }
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = null,
-                tint = Color.Cyan,
-                modifier = Modifier.size(25.dp)
-            )
-        }
-        IconButton(
-            onClick = { },
-            modifier = Modifier
-                .size(40.dp)
-                .constrainAs(editIcon) {
-                    top.linkTo(parent.top, margin = 30.dp)
-                    end.linkTo(parent.end, margin = 10.dp)
-                }
-        ) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = null,
-                tint = Color.Cyan,
-                modifier = Modifier.size(25.dp)
-            )
-        }
         Surface(
             modifier = Modifier
-                .fillMaxHeight(0.5f)
                 .fillMaxWidth()
-//
                 .constrainAs(surface) {
                     top.linkTo(profileImage.bottom, margin = (-40).dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
             shape = RoundedCornerShape(
-                topEnd = 40.dp,
-                topStart = 40.dp
+                topEnd = 30.dp,
+                topStart = 30.dp
             )
         ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -250,8 +320,34 @@ fun DefaultProfileScreen(
 }
 
 @Composable
-fun EditProfileScreen(userViewModel: UserViewModel) {
-    val user = userViewModel.userState.collectAsState()
+fun EditProfileScreen(
+    user:User,
+    isEditProfileViewModel: IsEditProfileViewModel,
+    userViewModel: UserViewModel
+) {
+
+    val isEditProfile = isEditProfileViewModel.editProfile.collectAsState()
+
+    var changeImage by rememberSaveable {
+        mutableStateOf(user.image)
+    }
+    var changeName by rememberSaveable {
+        mutableStateOf(user.name)
+    }
+
+    val context=LocalContext.current
+
+    LaunchedEffect(isEditProfile.value) {
+        when(isEditProfile.value){
+            false -> {
+                userViewModel.saveUser(newUser = User(name = changeName, image = changeImage))
+                Toast.makeText(context, "saqlandi", Toast.LENGTH_SHORT).show()
+            }
+            else ->{
+                Unit
+            }
+        }
+    }
 
     val imageLoading = ImageLoader.Builder(LocalContext.current)
         .crossfade(400)
@@ -259,12 +355,10 @@ fun EditProfileScreen(userViewModel: UserViewModel) {
         .error(R.drawable.ic_launcher_foreground)
         .build()
 
-    val changeImage by rememberSaveable {
-        mutableStateOf(user.value?.image)
-    }
     Column(
         Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(top = 100.dp),
         verticalArrangement = Arrangement.Center
     ) {
         val shadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
@@ -283,9 +377,6 @@ fun EditProfileScreen(userViewModel: UserViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(50.dp))
-                var changeName by remember {
-                    mutableStateOf(user.value?.name)
-                }
                 val myBrush = Brush.linearGradient(
                     listOf(
                         Color.Red,
@@ -360,20 +451,9 @@ fun EditProfileScreen(userViewModel: UserViewModel) {
                     modifier = Modifier
                         .padding(horizontal = 40.dp)
                 )
+
                 Spacer(modifier = Modifier.height(50.dp))
             }
         }
-
     }
-
-}
-
-
-@Preview(showSystemUi = true)
-@Composable
-private fun ProfileScreenPreview() {
-    val navHostController = rememberNavController()
-//    val userViewModel= viewModel<UserViewModel>()
-//    EditProfileScreen(userViewModel)
-
 }

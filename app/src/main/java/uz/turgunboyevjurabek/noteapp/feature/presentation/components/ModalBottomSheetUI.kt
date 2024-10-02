@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
@@ -24,6 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
@@ -57,6 +61,11 @@ fun ModalBottomSheetUI(
                 Text(text = "Name")
             },
             shape = ShapeDefaults.ExtraLarge,
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next
+            ),
             modifier = modifier
                 .padding(5.dp)
         )
@@ -71,11 +80,17 @@ fun ModalBottomSheetUI(
                 Text(text = "Description")
             },
             shape = ShapeDefaults.ExtraLarge,
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done
+            ),
             modifier = modifier
                 .padding(5.dp)
         )
         Spacer(modifier = Modifier.height(50.dp))
         OutlinedIconButton(
+
             modifier = modifier
                 .size(50.dp),
             onClick = {
