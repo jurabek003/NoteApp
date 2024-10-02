@@ -28,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import uz.turgunboyevjurabek.noteapp.core.MyApp
+import uz.turgunboyevjurabek.noteapp.feature.presentation.navigation.MyNavigation
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.AuthScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.IsDeleteNotesScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.MainScreen
@@ -47,61 +48,7 @@ class MainActivity : ComponentActivity() {
                 // DataStore va ViewModel ni olish
                 val dataStore = (application as MyApp).userDataStore
                 val userViewModel = UserViewModel(dataStore)
-                val viewModel = userViewModel.userState.collectAsState()
-
-                val isEditNoteViewModel = IsEditNoteViewModel()
-
-                // NavController ni yaratish
-                val navController = rememberNavController()
-                var startDestination by remember { mutableStateOf(false) }
-                val scope = rememberCoroutineScope()
-                LaunchedEffect(viewModel.value) {
-                    scope.launch {
-                        startDestination =
-                            viewModel.value?.name != null && viewModel.value?.image != null
-                    }
-                }
-                // NavHost yordamida navigatsiya
-                NavHost(navController = navController, startDestination = "splash") {
-                    composable("splash") {
-                        SplashScreen(
-                            isLoggedIn = startDestination,
-                            onNavigateToMain = {
-                                navController.navigate("main") {
-                                    // Splash ekranidan keyin navigatsiya qilishda oldingi ekranlarni olib tashlaydi
-                                    popUpTo("splash") { inclusive = true }
-                                }
-                            },
-                            onNavigateToAuth = {
-                                navController.navigate("auth") {
-                                    popUpTo("splash") { inclusive = true }
-                                }
-                            },
-                            userViewModel = userViewModel
-                        )
-                    }
-                    composable("main") {
-                        MainScreen(
-                            _userViewModel = userViewModel,
-                            navHostController = navController
-                        )
-                    }
-                    composable("auth") {
-                        AuthScreen(
-                            viewModel = userViewModel,
-                            navHostController = navController
-                        )
-                    }
-                    composable("selectedNote") {
-                        SelectedNoteScreen(navController, isEditNoteViewModel = isEditNoteViewModel)
-                    }
-                    composable("isDelete") {
-                        IsDeleteNotesScreen(navHostController = navController)
-                    }
-                    composable("profile"){
-                        ProfileScreen(navHostController = navController, userViewModel = userViewModel)
-                    }
-                }
+                MyNavigation(userViewModel = userViewModel, dataStore = dataStore)
             }
         }
 

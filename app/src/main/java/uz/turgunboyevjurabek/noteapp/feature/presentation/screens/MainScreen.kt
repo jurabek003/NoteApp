@@ -58,6 +58,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -83,6 +85,7 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
 import coil.util.CoilUtils
+import kotlinx.coroutines.launch
 import okhttp3.internal.wait
 import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.core.utils.NoteObj
@@ -100,16 +103,13 @@ fun MainScreen(
 ) {
     val context = LocalContext.current
     val notes by viewModel.notes.collectAsState()
+    val scope= rememberCoroutineScope()
     var isSheetOpen by rememberSaveable {
         mutableStateOf(false)
     }
 
     val userViewModel = _userViewModel.userState.collectAsState()
-    println("rasm -> ${userViewModel.value?.image}")
 
-    val contentResolver = context.contentResolver
-//    val inputStream = userViewModel.value?.image?.let { contentResolver.openInputStream(it.toUri()) }
-//    val bitmap = BitmapFactory.decodeStream(inputStream)
 
     Scaffold(
         modifier = Modifier
@@ -141,33 +141,21 @@ fun MainScreen(
                                 horizontalArrangement = Arrangement.SpaceAround,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val imageLoader = ImageLoader.Builder(context)
-                                    .error(R.drawable.ic_launcher_foreground)
-                                    .crossfade(true)
-                                    .placeholder(R.drawable.ic_image)
-                                    .memoryCachePolicy(CachePolicy.ENABLED) //Keshlash
-                                    .build()
                                 Text(
                                     text = "Hello, ${userViewModel.value?.name}",
                                     fontWeight = FontWeight.ExtraBold,
                                     fontFamily = FontFamily.Serif,
                                     fontSize = MaterialTheme.typography.displaySmall.fontSize
                                 )
-                                val contentResolver = context.contentResolver
-                                val imageUri = userViewModel.value?.image?.toUri()
-                                if (imageUri != null) {
+                                val imageLoader = ImageLoader.Builder(context)
+                                    .error(R.drawable.ic_launcher_foreground)
+                                    .crossfade(1200)
+                                    .placeholder(R.drawable.ic_image)
+                                    .memoryCachePolicy(CachePolicy.ENABLED) //Keshlash
+                                    .build()
                                     Image(
                                         painter = rememberAsyncImagePainter(
-                                            model = try {
-                                                imageUri
-                                            } catch (e: SecurityException) {
-                                                e.printStackTrace()
-                                                Toast.makeText(
-                                                    context,
-                                                    "Faylga kirish uchun ruxsat kerak",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            },
+                                            model = userViewModel.value?.image,
                                             imageLoader = imageLoader
                                         ),
                                         contentDescription = null,
@@ -183,7 +171,6 @@ fun MainScreen(
                                             ),
                                         contentScale = ContentScale.Crop
                                     )
-                                }
                             }
                             Spacer(modifier = Modifier.height(20.dp))
                         }

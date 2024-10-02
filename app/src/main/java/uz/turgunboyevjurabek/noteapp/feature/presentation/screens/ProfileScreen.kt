@@ -63,7 +63,7 @@ fun ProfileScreen(
     ) {
         val (profileImage, surface,navigationIcon,editIcon) = createRefs()
         val imageLoading = ImageLoader.Builder(LocalContext.current)
-            .crossfade(true)
+            .crossfade(1000)
             .placeholder(R.drawable.ic_camera)
             .error(R.drawable.ic_image)
             .build()

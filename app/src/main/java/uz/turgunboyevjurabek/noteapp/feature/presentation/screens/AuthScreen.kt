@@ -2,7 +2,9 @@ package uz.turgunboyevjurabek.noteapp.feature.presentation.screens
 
 import UserViewModel
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,12 +75,19 @@ fun AuthScreen(
         /**
          * Rasm tanlash uchun launcher
          */
-        val launcher =
-            rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.GetContent()
-            ) {uri: Uri? ->
-                selectedImageUri=uri
+        val launcher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent(),
+            onResult = { uri: Uri? ->
+                uri?.let {
+                    // Doimiy ruxsat olish
+                    context.contentResolver.takePersistableUriPermission(
+                        it,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    selectedImageUri=it
+                }
             }
+        )
 
         Column(
             modifier = modifier

@@ -3,7 +3,6 @@ package uz.turgunboyevjurabek.noteapp.feature.data.repository_impl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import uz.turgunboyevjurabek.noteapp.feature.data.data_source.local.NoteDao
-import uz.turgunboyevjurabek.noteapp.feature.data.data_source.local.NoteEntity
 import uz.turgunboyevjurabek.noteapp.feature.data.mappers.toNote
 import uz.turgunboyevjurabek.noteapp.feature.data.mappers.toNoteEntity
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
