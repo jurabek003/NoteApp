@@ -31,6 +31,7 @@ import uz.turgunboyevjurabek.noteapp.core.MyApp
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.AuthScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.IsDeleteNotesScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.MainScreen
+import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.ProfileScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.screens.SelectedNoteScreen
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.IsEditNoteViewModel
 import uz.turgunboyevjurabek.noteapp.ui.theme.NoteAppTheme
@@ -96,6 +97,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("isDelete") {
                         IsDeleteNotesScreen(navHostController = navController)
+                    }
+                    composable("profile"){
+                        ProfileScreen(navHostController = navController, userViewModel = userViewModel)
                     }
                 }
             }
