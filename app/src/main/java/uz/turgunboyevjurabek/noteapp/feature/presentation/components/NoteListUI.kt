@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.ShapeDefaults
@@ -40,12 +41,15 @@ fun NoteListUI(modifier: Modifier = Modifier,notes:Note,onClick:(Note)->Unit) {
     ) {
         ConstraintLayout(
             modifier = Modifier
+                .widthIn(min = 200.dp, max = 250.dp)
                 .padding(PaddingValues(10.dp))
         ) {
             val (name,description)=createRefs()
             Text(
                 text = notes.name,
                 style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.ExtraBold),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 modifier = modifier
                     .constrainAs(name){
                         start.linkTo(parent.start, margin = 7.dp)
@@ -70,7 +74,7 @@ fun NoteListUI(modifier: Modifier = Modifier,notes:Note,onClick:(Note)->Unit) {
 @Preview
 @Composable
 fun NoteListUIPreview(){
-    val note=Note(0,"Mening birinchi noteim","Assalomu alaykum Bu mening birinchi notim")
+//    val note=Note(0,"Mening birinchi noteim","Assalomu alaykum Bu mening birinchi notim")
 //    NoteListUI(notes = note)
 }
         

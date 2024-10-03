@@ -4,7 +4,11 @@ package uz.turgunboyevjurabek.noteapp.feature.presentation.screens
 
 import UserViewModel
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -116,7 +120,7 @@ fun ProfileScreen(
     userViewModel: UserViewModel,
     isEditProfileViewModel: IsEditProfileViewModel = viewModel<IsEditProfileViewModel>()
 ) {
-    val scope= rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
     val shadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -145,11 +149,11 @@ fun ProfileScreen(
                         visible = !isEdit,
                         enter = slideInVertically(
                             tween(700),
-                            initialOffsetY = { _ -> 200}
+                            initialOffsetY = { _ -> 200 }
                         ),
                         exit = slideOutVertically(
                             tween(600),
-                            targetOffsetY = { _ -> 200}
+                            targetOffsetY = { _ -> 200 }
                         ),
                         content = {
                             Text(
@@ -163,11 +167,11 @@ fun ProfileScreen(
                         visible = isEdit,
                         enter = slideInVertically(
                             tween(700),
-                            initialOffsetY = { _ -> 100}
+                            initialOffsetY = { _ -> 100 }
                         ),
                         exit = slideOutVertically(
                             tween(600),
-                            targetOffsetY = { _ -> 100}
+                            targetOffsetY = { _ -> 100 }
                         ),
                         content = {
                             Text(
@@ -215,7 +219,7 @@ fun ProfileScreen(
                 }
             )
         },
-        content ={
+        content = {
             val scrollState = rememberScrollState()
             Column(
                 modifier = Modifier
@@ -232,7 +236,10 @@ fun ProfileScreen(
                 }
                 AnimatedVisibility(visible = isEdit) {
                     EditProfileScreen(
-                        user = User(userViewModel.userState.value?.name,userViewModel.userState.value?.image),
+                        user = User(
+                            userViewModel.userState.value?.name,
+                            userViewModel.userState.value?.image
+                        ),
                         isEditProfileViewModel = isEditProfileViewModel,
                         userViewModel = userViewModel
                     )
@@ -321,7 +328,7 @@ fun DefaultProfileScreen(
 
 @Composable
 fun EditProfileScreen(
-    user:User,
+    user: User,
     isEditProfileViewModel: IsEditProfileViewModel,
     userViewModel: UserViewModel
 ) {
@@ -335,19 +342,30 @@ fun EditProfileScreen(
         mutableStateOf(user.name)
     }
 
-    val context=LocalContext.current
+    val context = LocalContext.current
 
-    LaunchedEffect(isEditProfile.value) {
-        when(isEditProfile.value){
-            false -> {
-                userViewModel.saveUser(newUser = User(name = changeName, image = changeImage))
-                Toast.makeText(context, "saqlandi", Toast.LENGTH_SHORT).show()
-            }
-            else ->{
-                Unit
+    /**
+     * Tanlangan rasmning Uri'sini saqlash uchun state
+     */
+    var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+
+    /**
+     * Rasm tanlash uchun launcher
+     */
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                // Doimiy ruxsat olish
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                selectedImageUri = it
             }
         }
-    }
+    )
+
 
     val imageLoading = ImageLoader.Builder(LocalContext.current)
         .crossfade(400)
@@ -394,15 +412,18 @@ fun EditProfileScreen(
                         .clip(RoundedCornerShape(90.dp)),
                     contentAlignment = Alignment.BottomCenter
                 ) {
+
                     Image(
                         painter = rememberAsyncImagePainter(
-                            model = changeImage,
+                            model = if (selectedImageUri != null) selectedImageUri else changeImage,
                             imageLoader = imageLoading
                         ),
                         contentScale = ContentScale.Crop,
                         contentDescription = null,
                         modifier = Modifier
-                            .clickable { }
+                            .clickable { // Rasm tanlash uchun galereyani ochish
+                                launcher.launch("image/*")
+                            }
                             .clip(ShapeDefaults.ExtraLarge)
                             .border(3.dp, brush = myBrush, shape = RoundedCornerShape(90.dp))
                             .fillMaxSize()
@@ -453,6 +474,30 @@ fun EditProfileScreen(
                 )
 
                 Spacer(modifier = Modifier.height(50.dp))
+            }
+        }
+    }
+
+
+    /**
+     * UserViewModelni yangilash
+     */
+    LaunchedEffect(isEditProfile.value) {
+        when (isEditProfile.value) {
+            false -> {
+                if (selectedImageUri != null && changeName != null) {
+                    userViewModel.saveUser(
+                        newUser = User(
+                            name = changeName,
+                            image = selectedImageUri.toString()
+                        )
+                    )
+                    Toast.makeText(context, "saqlandi", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            else -> {
+                Unit
             }
         }
     }

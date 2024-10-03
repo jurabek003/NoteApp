@@ -16,6 +16,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,9 +48,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalBottomSheetDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Shapes
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
@@ -66,6 +69,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -107,6 +111,8 @@ fun MainScreen(
     var isSheetOpen by rememberSaveable {
         mutableStateOf(false)
     }
+    val rowShadowColor = if (isSystemInDarkTheme()) Color.White else Color.Red
+    val mainSurfaceShadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
 
     val userViewModel = _userViewModel.userState.collectAsState()
 
@@ -120,6 +126,11 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight(unbounded = true)
+                        .graphicsLayer {
+                            spotShadowColor = mainSurfaceShadowColor
+                            shadowElevation = 10f
+                            shape = ShapeDefaults.ExtraLarge
+                        }
                         .background(Color.Transparent),
                     color = MaterialTheme.colorScheme.surface,
                     contentColor = contentColorFor(MaterialTheme.colorScheme.surface),
@@ -179,12 +190,20 @@ fun MainScreen(
                 Spacer(modifier = Modifier.height(20.dp))
                 LazyRow(
                     modifier = Modifier,
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(horizontal = 15.dp)
                 ) {
                     items(20) {
                         Surface(
                             modifier = Modifier
-                                .padding(PaddingValues(horizontal = 5.dp, vertical = 15.dp))
-                                .wrapContentSize(),
+                                .padding(PaddingValues(vertical = 15.dp))
+                                .wrapContentSize()
+                                .graphicsLayer {
+                                    spotShadowColor = rowShadowColor
+                                        shadowElevation = 5f
+                                    shape = ShapeDefaults.ExtraLarge
+                                },
                             shape = ShapeDefaults.ExtraLarge,
                             shadowElevation = 5.dp
                         ) {
@@ -192,6 +211,27 @@ fun MainScreen(
                                 text = "Item $it",
                                 modifier = Modifier
                                     .padding(PaddingValues(horizontal = 10.dp, vertical = 5.dp))
+                            )
+                        }
+                    }
+                    item{
+                        Surface(
+                            modifier = Modifier
+                                .padding(PaddingValues(horizontal = 5.dp, vertical = 15.dp))
+                                .wrapContentSize()
+                                .graphicsLayer {
+                                    spotShadowColor = Color.Yellow
+                                    shadowElevation = 20f
+                                    shape = ShapeDefaults.Medium
+                                },
+                            shadowElevation = 5.dp,
+                            shape = ShapeDefaults.Medium
+                        ){
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(40.dp)
                             )
                         }
                     }
@@ -222,11 +262,15 @@ fun MainScreen(
             /**
              * For BottomSheetDialog
              */
-            val bottomSheetState = rememberModalBottomSheetState()
+            val bottomSheetState = rememberModalBottomSheetState(
+                skipPartiallyExpanded = true,
+                confirmValueChange = { it == SheetValue.Expanded }
+            )
             if (isSheetOpen) {
                 ModalBottomSheet(
+                    tonalElevation = 5.dp,
                     sheetState = bottomSheetState,
-                    onDismissRequest = { isSheetOpen = false }
+                    onDismissRequest = { isSheetOpen = false },
                 ) {
                     ModalBottomSheetUI(
                         onDismiss = { isSheetOpen = false }

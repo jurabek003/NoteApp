@@ -56,6 +56,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -114,7 +115,9 @@ fun SelectedNoteScreen(
                         Text(
                             text = note?.name.toString(),
                             fontFamily = FontFamily.SansSerif,
-                            fontWeight = FontWeight.Black
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                     AnimatedVisibility(
@@ -185,7 +188,7 @@ fun SelectedNoteScreen(
                             targetOffsetY = { _ -> 100f.toInt() })
                     ){
                         IconButton(onClick = {
-                            note?.let { viewModel.updateNote(note = Note(id = it.id, name = it.name, description = it.description, isDelete = true) ) }
+                            note?.let { viewModel.updateNote(note = Note(id = it.id, name = it.name, description = it.description, isDelete = true,categoryId = it.categoryId) ) }
                             navHostController.popBackStack()
                         }) {
                             Icon(imageVector = Icons.Default.Delete, contentDescription = null)
@@ -243,7 +246,7 @@ fun EditNoteScreen(
                     noteName=name
                     noteDescription=description
                 }
-                noteViewModel.updateNote(Note(note.id, name = name, description = description))
+                noteViewModel.updateNote(Note(note.id, name = name, description = description, categoryId = 1))
             }
             else -> {
                 Unit

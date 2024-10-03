@@ -8,6 +8,7 @@ fun NoteEntity.toNote(): Note {
         id = this.id,
         name = this.name,
         description = this.description,
-        isDelete=this.isDelete
+        isDelete=this.isDelete,
+        categoryId=this.categoryId
     )
 }

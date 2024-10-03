@@ -53,8 +53,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import uz.turgunboyevjurabek.noteapp.R
+import uz.turgunboyevjurabek.noteapp.feature.domein.madels.MyCategory
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.User
 import uz.turgunboyevjurabek.noteapp.feature.presentation.state.ResultState
+import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.CategoryViewModel
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -62,10 +64,14 @@ import uz.turgunboyevjurabek.noteapp.feature.presentation.state.ResultState
 fun AuthScreen(
     modifier: Modifier = Modifier,
     viewModel: UserViewModel,
+    categoryViewModel: CategoryViewModel = hiltViewModel(),
     navHostController: NavHostController
 )  {
     val user by viewModel.userState.collectAsState()
     val context=LocalContext.current
+
+    categoryViewModel.addCategory(MyCategory(1,"All"))
+
     Scaffold {
         /**
          * Tanlangan rasmning Uri'sini saqlash uchun state

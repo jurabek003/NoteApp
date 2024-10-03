@@ -1,16 +1,23 @@
 package uz.turgunboyevjurabek.noteapp.feature.presentation.components
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ShapeDefaults
@@ -24,11 +31,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.NoteViewModel
@@ -52,6 +61,13 @@ fun ModalBottomSheetUI(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            text = "Add Note",
+            fontWeight = FontWeight.Black,
+            fontFamily = FontFamily.Serif,
+            fontSize = 20.sp
+        )
+        Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = textName,
             onValueChange = {
@@ -60,16 +76,17 @@ fun ModalBottomSheetUI(
             label = {
                 Text(text = "Name")
             },
-            shape = ShapeDefaults.ExtraLarge,
+            maxLines = 2,
+            shape = ShapeDefaults.Medium,
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Words,
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next
             ),
             modifier = modifier
-                .padding(5.dp)
+                .fillMaxWidth()
+                .padding(12.dp)
         )
-
         Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = textDescription,
@@ -79,35 +96,60 @@ fun ModalBottomSheetUI(
             label = {
                 Text(text = "Description")
             },
-            shape = ShapeDefaults.ExtraLarge,
+            shape = ShapeDefaults.Medium,
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Words,
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done
             ),
             modifier = modifier
-                .padding(5.dp)
+                .padding(horizontal = 12.dp)
+                .heightIn(min = 150.dp, max = 300.dp)
+                .fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(50.dp))
-        OutlinedIconButton(
-
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(
             modifier = modifier
-                .size(50.dp),
-            onClick = {
-                if (textName.isNotEmpty() && textDescription.isNotEmpty()) {
-                    viewModel.insertNote(
-                        Note(
-                            name = textName, description = textDescription
-                        )
-                    )
-                    onDismiss()
-                }else{
-                    Toast.makeText(context, "Name and Description is empty", Toast.LENGTH_SHORT).show()
-                }
-            },
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = null)
-//            Text(text = "Add", fontWeight = FontWeight.ExtraBold)
+            OutlinedButton(
+                modifier = modifier,
+                onClick = {
+                    onDismiss()
+                },
+            ) {
+                Text(text = "Close")
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    modifier = Modifier
+                )
+            }
+            OutlinedButton(
+                modifier = modifier,
+                onClick = {
+                    if (textName.isNotEmpty() && textDescription.isNotEmpty()) {
+                        viewModel.insertNote(
+                            Note(
+                                name = textName, description = textDescription, categoryId = 1
+                            )
+                        )
+                        onDismiss()
+                    }else{
+                        Toast.makeText(context, "Name and Description is empty", Toast.LENGTH_SHORT).show()
+                    }
+                },
+            ) {
+                Text(text = "Sava")
+                Icon(
+                    imageVector = Icons.Default.Done,
+                    contentDescription = null,
+                    modifier = Modifier
+                )
+            }
         }
     }
 }
