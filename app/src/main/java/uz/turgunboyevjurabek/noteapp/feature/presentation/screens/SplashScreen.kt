@@ -30,7 +30,6 @@ fun SplashScreen(
     onNavigateToAuth: () -> Unit,
     userViewModel: UserViewModel
 ) {
-
     val user by userViewModel.userState.collectAsState()
 
     LaunchedEffect(user) {

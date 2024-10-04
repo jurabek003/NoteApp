@@ -1,8 +1,13 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package uz.turgunboyevjurabek.noteapp.feature.presentation.components
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,13 +16,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ShapeDefaults
@@ -40,14 +48,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
+import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.CategoryViewModel
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.NoteViewModel
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ModalBottomSheetUI(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit,
     viewModel: NoteViewModel = hiltViewModel(),
-//    content: @Composable () -> Unit
+    categoryViewModel: CategoryViewModel= hiltViewModel()
 ) {
     var textName by rememberSaveable {
         mutableStateOf("")
@@ -55,9 +65,11 @@ fun ModalBottomSheetUI(
     var textDescription by rememberSaveable {
         mutableStateOf("")
     }
+    val scroll= rememberScrollState()
     val context = LocalContext.current
     Column(
         modifier = modifier
+            .verticalScroll(scroll)
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -108,6 +120,26 @@ fun ModalBottomSheetUI(
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(20.dp))
+        FlowRow(
+            modifier = modifier
+                .padding(horizontal = 12.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            repeat(categoryViewModel.categories.value.size) { index ->
+                OutlinedCard(
+                    modifier=modifier
+                ) {
+                    Text(
+                        text = categoryViewModel.categories.value[index].name,
+                        fontWeight = FontWeight.Medium,
+                        modifier=modifier
+                        .padding(5.dp))
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(20.dp))
         Row(
             modifier = modifier
                 .padding(horizontal = 20.dp)
@@ -151,5 +183,6 @@ fun ModalBottomSheetUI(
                 )
             }
         }
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }

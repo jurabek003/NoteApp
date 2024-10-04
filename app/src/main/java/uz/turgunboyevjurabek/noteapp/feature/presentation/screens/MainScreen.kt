@@ -49,6 +49,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetDefaults
+import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Shapes
@@ -80,6 +81,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.SecureFlagPolicy
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -94,7 +96,9 @@ import okhttp3.internal.wait
 import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.core.utils.NoteObj
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ModalBottomSheetUI
+import uz.turgunboyevjurabek.noteapp.feature.presentation.components.MyDialog
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.NoteListUI
+import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.CategoryViewModel
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.NoteViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -103,14 +107,20 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     viewModel: NoteViewModel = hiltViewModel(),
     _userViewModel: UserViewModel,
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val notes by viewModel.notes.collectAsState()
-    val scope= rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     var isSheetOpen by rememberSaveable {
         mutableStateOf(false)
     }
+    var isDialogOpen by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val myCategoryViewModel=categoryViewModel.categories.collectAsState()
+
     val rowShadowColor = if (isSystemInDarkTheme()) Color.White else Color.Red
     val mainSurfaceShadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
 
@@ -164,24 +174,24 @@ fun MainScreen(
                                     .placeholder(R.drawable.ic_image)
                                     .memoryCachePolicy(CachePolicy.ENABLED) //Keshlash
                                     .build()
-                                    Image(
-                                        painter = rememberAsyncImagePainter(
-                                            model = userViewModel.value?.image,
-                                            imageLoader = imageLoader
+                                Image(
+                                    painter = rememberAsyncImagePainter(
+                                        model = userViewModel.value?.image,
+                                        imageLoader = imageLoader
+                                    ),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            navHostController.navigate("profile")
+                                        }
+                                        .border(
+                                            border = BorderStroke(1.5.dp, color = Color.Red),
+                                            shape = CircleShape
                                         ),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(50.dp)
-                                            .clip(CircleShape)
-                                            .clickable {
-                                                navHostController.navigate("profile")
-                                            }
-                                            .border(
-                                                border = BorderStroke(1.5.dp, color = Color.Red),
-                                                shape = CircleShape
-                                            ),
-                                        contentScale = ContentScale.Crop
-                                    )
+                                    contentScale = ContentScale.Crop
+                                )
                             }
                             Spacer(modifier = Modifier.height(20.dp))
                         }
@@ -194,39 +204,40 @@ fun MainScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(horizontal = 15.dp)
                 ) {
-                    items(20) {
+                    items(myCategoryViewModel.value.size) {
                         Surface(
                             modifier = Modifier
                                 .padding(PaddingValues(vertical = 15.dp))
                                 .wrapContentSize()
                                 .graphicsLayer {
                                     spotShadowColor = rowShadowColor
-                                        shadowElevation = 5f
+                                    shadowElevation = 5f
                                     shape = ShapeDefaults.ExtraLarge
                                 },
                             shape = ShapeDefaults.ExtraLarge,
                             shadowElevation = 5.dp
                         ) {
                             Text(
-                                text = "Item $it",
+                                text = myCategoryViewModel.value[it].name,
                                 modifier = Modifier
                                     .padding(PaddingValues(horizontal = 10.dp, vertical = 5.dp))
                             )
                         }
                     }
-                    item{
+                    item {
                         Surface(
                             modifier = Modifier
-                                .padding(PaddingValues(horizontal = 5.dp, vertical = 15.dp))
                                 .wrapContentSize()
                                 .graphicsLayer {
                                     spotShadowColor = Color.Yellow
-                                    shadowElevation = 20f
-                                    shape = ShapeDefaults.Medium
+                                    shadowElevation = 30f
+                                    shape = ShapeDefaults.Large
                                 },
-                            shadowElevation = 5.dp,
-                            shape = ShapeDefaults.Medium
-                        ){
+                            shape = ShapeDefaults.Medium,
+                            onClick = {
+                                isDialogOpen = !isDialogOpen
+                            }
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = null,
@@ -241,6 +252,7 @@ fun MainScreen(
                     verticalItemSpacing = (-15).dp,
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                     modifier = modifier
+                        .fillMaxSize()
                 ) {
                     items(notes.size) { note ->
                         NoteListUI(
@@ -264,18 +276,37 @@ fun MainScreen(
              */
             val bottomSheetState = rememberModalBottomSheetState(
                 skipPartiallyExpanded = true,
-                confirmValueChange = { it == SheetValue.Expanded }
+                confirmValueChange = {
+                    it == SheetValue.Expanded
+                }
             )
             if (isSheetOpen) {
                 ModalBottomSheet(
-                    tonalElevation = 5.dp,
+                    tonalElevation = 15.dp,
                     sheetState = bottomSheetState,
                     onDismissRequest = { isSheetOpen = false },
+                    properties = ModalBottomSheetProperties(
+                        securePolicy = SecureFlagPolicy.SecureOn,
+                        isFocusable = true,
+                        shouldDismissOnBackPress = false,
+                    ),
                 ) {
                     ModalBottomSheetUI(
                         onDismiss = { isSheetOpen = false }
                     )
                 }
+            }
+
+
+            /**
+             * For Dialog
+             */
+            if (isDialogOpen) {
+                MyDialog(
+                    onDismiss = {
+                        isDialogOpen = false
+                    }
+                )
             }
         },
         bottomBar = {
