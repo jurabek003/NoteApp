@@ -18,7 +18,8 @@ class CategoryViewModel @Inject constructor(
 ) : ViewModel() {
 
     val categories: StateFlow<List<MyCategory>> = categoryRepository.getAllCategories()
-        .stateIn(viewModelScope,
+        .stateIn(
+            viewModelScope,
             SharingStarted.Lazily,
             emptyList()
         )

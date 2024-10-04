@@ -29,8 +29,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -51,16 +53,23 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetDefaults
 import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -95,6 +104,8 @@ import kotlinx.coroutines.launch
 import okhttp3.internal.wait
 import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.core.utils.NoteObj
+import uz.turgunboyevjurabek.noteapp.feature.domein.madels.MyCategory
+import uz.turgunboyevjurabek.noteapp.feature.presentation.components.CustomTab
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ModalBottomSheetUI
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.MyDialog
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.NoteListUI
@@ -119,14 +130,17 @@ fun MainScreen(
     var isDialogOpen by rememberSaveable {
         mutableStateOf(false)
     }
+    var selectedTabIndex by remember {
+        mutableIntStateOf(0)
+    }
+
     val myCategoryViewModel=categoryViewModel.categories.collectAsState()
 
-    val rowShadowColor = if (isSystemInDarkTheme()) Color.White else Color.Red
     val mainSurfaceShadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
 
     val userViewModel = _userViewModel.userState.collectAsState()
-
-
+    val tabs=ArrayList<MyCategory>()
+    tabs.addAll(myCategoryViewModel.value)
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -170,7 +184,7 @@ fun MainScreen(
                                 )
                                 val imageLoader = ImageLoader.Builder(context)
                                     .error(R.drawable.ic_launcher_foreground)
-                                    .crossfade(1200)
+                                    .crossfade(500)
                                     .placeholder(R.drawable.ic_image)
                                     .memoryCachePolicy(CachePolicy.ENABLED) //Keshlash
                                     .build()
@@ -198,33 +212,28 @@ fun MainScreen(
                     }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                LazyRow(
-                    modifier = Modifier,
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(horizontal = 15.dp)
+                ScrollableTabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    indicator = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
                 ) {
-                    items(myCategoryViewModel.value.size) {
-                        Surface(
-                            modifier = Modifier
-                                .padding(PaddingValues(vertical = 15.dp))
-                                .wrapContentSize()
-                                .graphicsLayer {
-                                    spotShadowColor = rowShadowColor
-                                    shadowElevation = 5f
-                                    shape = ShapeDefaults.ExtraLarge
-                                },
-                            shape = ShapeDefaults.ExtraLarge,
-                            shadowElevation = 5.dp
-                        ) {
-                            Text(
-                                text = myCategoryViewModel.value[it].name,
-                                modifier = Modifier
-                                    .padding(PaddingValues(horizontal = 10.dp, vertical = 5.dp))
-                            )
-                        }
+                    tabs.forEachIndexed { index, myCategory ->
+                        CustomTab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = {
+                                Text(
+                                    text = myCategory.name,
+                                    fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = if(selectedTabIndex==index) 20.sp else 15.sp
+                                )
+                            }
+                        ){}
                     }
-                    item {
+                }
+                /*
+                 item {
                         Surface(
                             modifier = Modifier
                                 .wrapContentSize()
@@ -246,7 +255,7 @@ fun MainScreen(
                             )
                         }
                     }
-                }
+                 */
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Fixed(2),
                     verticalItemSpacing = (-15).dp,
@@ -270,7 +279,6 @@ fun MainScreen(
                 }
 
             }
-
             /**
              * For BottomSheetDialog
              */
@@ -296,7 +304,6 @@ fun MainScreen(
                     )
                 }
             }
-
 
             /**
              * For Dialog

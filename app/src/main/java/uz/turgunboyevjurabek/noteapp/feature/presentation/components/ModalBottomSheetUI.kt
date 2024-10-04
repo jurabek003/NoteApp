@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -33,11 +34,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +50,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import uz.turgunboyevjurabek.noteapp.feature.domein.madels.MyCategory
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.CategoryViewModel
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.NoteViewModel
@@ -67,6 +71,11 @@ fun ModalBottomSheetUI(
     }
     val scroll= rememberScrollState()
     val context = LocalContext.current
+    var categoryId by rememberSaveable {
+        mutableIntStateOf(1)
+    }
+    val categoryList=ArrayList<MyCategory>()
+    categoryList.addAll(categoryViewModel.categories.value)
     Column(
         modifier = modifier
             .verticalScroll(scroll)
@@ -127,8 +136,18 @@ fun ModalBottomSheetUI(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            repeat(categoryViewModel.categories.value.size) { index ->
+            repeat(categoryList.size) { index ->
                 OutlinedCard(
+                    onClick = {
+                        categoryId = categoryList[index].id
+
+                    },
+                    colors = CardDefaults.outlinedCardColors(
+                        containerColor = if (categoryList[index].id == categoryId)
+                            Color.Green
+                        else
+                            Color.Gray
+                    ),
                     modifier=modifier
                 ) {
                     Text(
@@ -166,7 +185,7 @@ fun ModalBottomSheetUI(
                     if (textName.isNotEmpty() && textDescription.isNotEmpty()) {
                         viewModel.insertNote(
                             Note(
-                                name = textName, description = textDescription, categoryId = 1
+                                name = textName, description = textDescription, categoryId = categoryId
                             )
                         )
                         onDismiss()

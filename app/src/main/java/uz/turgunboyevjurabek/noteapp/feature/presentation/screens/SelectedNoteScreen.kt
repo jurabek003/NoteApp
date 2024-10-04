@@ -246,7 +246,7 @@ fun EditNoteScreen(
                     noteName=name
                     noteDescription=description
                 }
-                noteViewModel.updateNote(Note(note.id, name = name, description = description, categoryId = 1))
+                noteViewModel.updateNote(Note(note.id, name = name, description = description, categoryId = note.categoryId))
             }
             else -> {
                 Unit
