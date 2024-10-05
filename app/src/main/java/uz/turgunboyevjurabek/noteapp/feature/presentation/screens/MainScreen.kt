@@ -11,11 +11,18 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -83,6 +90,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -122,8 +130,9 @@ fun MainScreen(
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val notes by viewModel.notes.collectAsState()
+
     val scope = rememberCoroutineScope()
+
     var isSheetOpen by rememberSaveable {
         mutableStateOf(false)
     }
@@ -134,13 +143,21 @@ fun MainScreen(
         mutableIntStateOf(0)
     }
 
-    val myCategoryViewModel=categoryViewModel.categories.collectAsState()
+    val notes by viewModel.notes.collectAsState()
+
+    val myCategoryViewModel by categoryViewModel.categories.collectAsState()
 
     val mainSurfaceShadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
 
     val userViewModel = _userViewModel.userState.collectAsState()
     val tabs=ArrayList<MyCategory>()
-    tabs.addAll(myCategoryViewModel.value)
+    tabs.addAll(myCategoryViewModel)
+
+    val selectedCategory = myCategoryViewModel.getOrNull(selectedTabIndex)?.id
+    val filteredNotes = notes.filter {
+        it.categoryId == selectedCategory && !it.isDelete
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -228,53 +245,69 @@ fun MainScreen(
                                     fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
                                     fontSize = if(selectedTabIndex==index) 20.sp else 15.sp
                                 )
-                            }
+                            },
+                            modifier = Modifier
+                                .pointerInput(Unit){
+                                    detectTapGestures(
+                                        onLongPress = {
+                                            Toast.makeText(context, "Uzooq kutildi", Toast.LENGTH_SHORT).show()
+                                        },
+                                        onTap = {
+                                            selectedTabIndex = index
+                                        }
+                                    )
+                                }
                         ){}
                     }
-                }
-                /*
-                 item {
-                        Surface(
-                            modifier = Modifier
-                                .wrapContentSize()
-                                .graphicsLayer {
-                                    spotShadowColor = Color.Yellow
-                                    shadowElevation = 30f
-                                    shape = ShapeDefaults.Large
-                                },
-                            shape = ShapeDefaults.Medium,
-                            onClick = {
-                                isDialogOpen = !isDialogOpen
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(40.dp)
-                            )
+                    Surface(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .graphicsLayer {
+                                spotShadowColor = Color.Yellow
+                                shadowElevation = 30f
+                                shape = ShapeDefaults.Large
+                            },
+                        shape = ShapeDefaults.Medium,
+                        onClick = {
+                            isDialogOpen = !isDialogOpen
                         }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                        )
                     }
-                 */
+
+                }
+
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Fixed(2),
                     verticalItemSpacing = (-15).dp,
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                     modifier = modifier
                         .fillMaxSize()
-                ) {
-                    items(notes.size) { note ->
-                        NoteListUI(
-                            notes = notes[note],
-                            onClick = { notes ->
-                                NoteObj.apply {
-                                    noteID = notes.id
-                                    noteName = notes.name
-                                    noteDescription = notes.description
+                ){
+                    val myNotes= if (selectedCategory == 1) notes.filter { !it.isDelete } else filteredNotes
+                    items(myNotes.size){ note ->
+                        AnimatedVisibility(
+                            visible = true, // You can add conditions based on category change if needed
+                            enter = fadeIn(animationSpec = tween(500)) + expandVertically(),
+                            exit = fadeOut(animationSpec = tween(300)) + shrinkVertically()
+                        ) {
+                            NoteListUI(
+                                notes = myNotes[note],
+                                onClick = { notes ->
+                                    NoteObj.apply {
+                                        noteID = notes.id
+                                        noteName = notes.name
+                                        noteDescription = notes.description
+                                    }
+                                    navHostController.navigate("selectedNote")
                                 }
-                                navHostController.navigate("selectedNote")
-                            }
-                        )
+                            )
+                        }
                     }
                 }
 

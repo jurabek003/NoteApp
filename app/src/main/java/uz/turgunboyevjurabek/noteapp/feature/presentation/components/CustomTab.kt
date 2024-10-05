@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CustomTab(
+    modifier: Modifier,
     selected: Boolean,
     onClick: () -> Unit,
     text: @Composable () -> Unit,
@@ -42,7 +43,7 @@ fun CustomTab(
     // Custom tabni shakllantirish
     Surface(
         onClick = { onClick() },
-        modifier = Modifier
+        modifier = modifier
             .padding(10.dp)
             .graphicsLayer {
                 spotShadowColor = rowShadowColor
@@ -55,7 +56,7 @@ fun CustomTab(
 
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .padding(5.dp)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
