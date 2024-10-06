@@ -1,4 +1,4 @@
-package uz.turgunboyevjurabek.noteapp.feature.domein.use_case
+package uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note
 
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
 import uz.turgunboyevjurabek.noteapp.feature.domein.repository.NoteRepository

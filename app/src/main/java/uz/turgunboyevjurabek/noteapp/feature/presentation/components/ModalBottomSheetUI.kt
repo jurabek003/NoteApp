@@ -75,7 +75,7 @@ fun ModalBottomSheetUI(
         mutableIntStateOf(1)
     }
     val categoryList=ArrayList<MyCategory>()
-    categoryList.addAll(categoryViewModel.categories.value)
+    categoryList.addAll(categoryViewModel.myCategories.value)
     Column(
         modifier = modifier
             .verticalScroll(scroll)
@@ -151,7 +151,7 @@ fun ModalBottomSheetUI(
                     modifier=modifier
                 ) {
                     Text(
-                        text = categoryViewModel.categories.value[index].name,
+                        text = categoryViewModel.myCategories.value[index].name,
                         fontWeight = FontWeight.Medium,
                         modifier=modifier
                         .padding(5.dp))

@@ -20,4 +20,16 @@ class CategoryRepositoryImpl(private val categoryDao: CategoryDao): CategoryRepo
         categoryDao.insertCategory(category.toCategoryEntity())
     }
 
+    override fun getCategoryByID(myCategory: MyCategory): Flow<MyCategory?> {
+        return categoryDao.getCategoryById(myCategory.id).map { it?.toCategory() }
+    }
+
+    override suspend fun deleteCategory(myCategory: MyCategory) {
+        categoryDao.deleteCategory(myCategory.toCategoryEntity())
+    }
+
+    override suspend fun updateCategory(myCategory: MyCategory) {
+        categoryDao.updateCategory(myCategory.toCategoryEntity())
+    }
+
 }

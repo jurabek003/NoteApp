@@ -1,4 +1,4 @@
-package uz.turgunboyevjurabek.noteapp.feature.domein.use_case
+package uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note
 
 import kotlinx.coroutines.flow.Flow
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note

@@ -3,19 +3,18 @@ package uz.turgunboyevjurabek.noteapp.feature.presentation.vm
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
-import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.DeleteNoteUseCase
-import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.GetAllNotesUseCase
-import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.GetNoteByIdUseCase
-import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.InsertNoteUseCase
-import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.IsDeleteUseCase
-import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.UpdateNoteUseCase
+import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.DeleteNoteUseCase
+import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.GetAllNotesUseCase
+import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.GetNoteByIdUseCase
+import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.InsertNoteUseCase
+import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.IsDeleteUseCase
+import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.UpdateNoteUseCase
 import javax.inject.Inject
 
 @HiltViewModel

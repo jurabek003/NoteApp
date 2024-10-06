@@ -44,7 +44,7 @@ fun MyDialog(
     onDismiss: () -> Unit,
     categoryViewModel: CategoryViewModel= hiltViewModel()
 ) {
-    var viewModel=categoryViewModel.categories.collectAsState()
+    var viewModel=categoryViewModel.myCategories.collectAsState()
 
     var categoryName by rememberSaveable {
         mutableStateOf("")

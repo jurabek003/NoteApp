@@ -114,6 +114,7 @@ import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.core.utils.NoteObj
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.MyCategory
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.CustomTab
+import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ForDeletingCategoryDialog
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ModalBottomSheetUI
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.MyDialog
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.NoteListUI
@@ -142,15 +143,19 @@ fun MainScreen(
     var selectedTabIndex by remember {
         mutableIntStateOf(0)
     }
+    var dialogForCategoryDeleting by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     val notes by viewModel.notes.collectAsState()
 
-    val myCategoryViewModel by categoryViewModel.categories.collectAsState()
+    val myCategoryViewModel by categoryViewModel.myCategories.collectAsState()
+    val selectedCategoryById by categoryViewModel.categoryById.collectAsState()
 
     val mainSurfaceShadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
 
     val userViewModel = _userViewModel.userState.collectAsState()
-    val tabs=ArrayList<MyCategory>()
+    val tabs = ArrayList<MyCategory>()
     tabs.addAll(myCategoryViewModel)
 
     val selectedCategory = myCategoryViewModel.getOrNull(selectedTabIndex)?.id
@@ -243,21 +248,22 @@ fun MainScreen(
                                 Text(
                                     text = myCategory.name,
                                     fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = if(selectedTabIndex==index) 20.sp else 15.sp
+                                    fontSize = if (selectedTabIndex == index) 20.sp else 15.sp
                                 )
                             },
                             modifier = Modifier
-                                .pointerInput(Unit){
+                                .pointerInput(Unit) {
                                     detectTapGestures(
                                         onLongPress = {
-                                            Toast.makeText(context, "Uzooq kutildi", Toast.LENGTH_SHORT).show()
+                                            categoryViewModel.getCategoryById(myCategory = myCategory)
+                                            dialogForCategoryDeleting = true
                                         },
                                         onTap = {
                                             selectedTabIndex = index
                                         }
                                     )
                                 }
-                        ){}
+                        ) {}
                     }
                     Surface(
                         modifier = Modifier
@@ -288,9 +294,10 @@ fun MainScreen(
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                     modifier = modifier
                         .fillMaxSize()
-                ){
-                    val myNotes= if (selectedCategory == 1) notes.filter { !it.isDelete } else filteredNotes
-                    items(myNotes.size){ note ->
+                ) {
+                    val myNotes =
+                        if (selectedCategory == 1) notes.filter { !it.isDelete } else filteredNotes
+                    items(myNotes.size) { note ->
                         AnimatedVisibility(
                             visible = true, // You can add conditions based on category change if needed
                             enter = fadeIn(animationSpec = tween(500)) + expandVertically(),
@@ -348,6 +355,16 @@ fun MainScreen(
                     }
                 )
             }
+
+            /**
+             * CategoryInfo Dialog for Deleting
+             */
+            if (dialogForCategoryDeleting) {
+                ForDeletingCategoryDialog(
+                    onDismiss = { dialogForCategoryDeleting = false }
+                )
+            }
+
         },
         bottomBar = {
             Row(
