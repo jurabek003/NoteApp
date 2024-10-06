@@ -10,4 +10,5 @@ interface CategoryRepository {
     fun getCategoryByID(myCategory: MyCategory):Flow<MyCategory?>
     suspend fun deleteCategory(myCategory: MyCategory)
     suspend fun updateCategory(myCategory: MyCategory)
+
 }

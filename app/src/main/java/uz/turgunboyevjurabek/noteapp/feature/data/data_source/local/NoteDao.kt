@@ -30,4 +30,13 @@ interface NoteDao {
     @Query("select * from MyNotes where isDelete = :isDelete")
     fun getIsDeletesNote(isDelete: Boolean):Flow<List<NoteEntity?>>
 
+    @Query("delete from MyNotes where isDelete = :isDelete")
+    suspend fun deleteAllDeletesNotes(isDelete: Boolean)
+
+    @Query("delete from MyNotes where id = :noteId")
+    suspend fun deleteNoteById(noteId: Int)
+
+    @Query("select * from MyNotes where categoryId = :categoryId")
+    fun getNotesByCategoryId(categoryId: Int): Flow<List<NoteEntity>>
+
 }

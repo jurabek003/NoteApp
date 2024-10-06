@@ -31,12 +31,13 @@ class CategoryViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _category = MutableStateFlow<List<MyCategory>>(emptyList())
+
     val myCategories: StateFlow<List<MyCategory>> =_category.asStateFlow()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Lazily,
-            emptyList()
-        )
+//        .stateIn(
+//            viewModelScope,
+//            SharingStarted.Lazily,
+//            emptyList()
+//        )
 
     private val _categoryById = MutableStateFlow<MyCategory?>(null)
     val categoryById: StateFlow<MyCategory?> = _categoryById.asStateFlow()

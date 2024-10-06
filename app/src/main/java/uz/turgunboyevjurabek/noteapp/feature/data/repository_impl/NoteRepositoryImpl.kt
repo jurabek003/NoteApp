@@ -40,4 +40,15 @@ class NoteRepositoryImpl(private val noteDao: NoteDao) : NoteRepository {
         noteDao.editNote(note.toNoteEntity())
     }
 
+    override suspend fun deleteNoteById(noteId: Int) {
+        noteDao.deleteNoteById(noteId = noteId)
+    }
+
+    override fun getNotesByCategoryId(categoryId: Int): Flow<List<Note>> {
+        return noteDao.getNotesByCategoryId(categoryId).map { noteEntities ->
+            noteEntities.map { it.toNote() }
+        }
+    }
+
+
 }

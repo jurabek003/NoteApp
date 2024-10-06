@@ -11,6 +11,7 @@ interface NoteRepository {
     suspend fun insertNote(note: Note)
     suspend fun deleteNote(note: Note)
     suspend fun updateNote(note: Note)
-
+    suspend fun deleteNoteById(noteId: Int)
+    fun getNotesByCategoryId(categoryId: Int): Flow<List<Note>>
 
 }
