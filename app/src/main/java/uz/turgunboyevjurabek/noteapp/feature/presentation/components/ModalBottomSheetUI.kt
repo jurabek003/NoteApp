@@ -140,7 +140,6 @@ fun ModalBottomSheetUI(
                 OutlinedCard(
                     onClick = {
                         categoryId = categoryList[index].id
-
                     },
                     colors = CardDefaults.outlinedCardColors(
                         containerColor = if (categoryList[index].id == categoryId)

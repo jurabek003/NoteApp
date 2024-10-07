@@ -9,8 +9,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -103,6 +105,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
@@ -119,13 +122,15 @@ import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ModalBottom
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.MyDialog
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.NoteListUI
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.CategoryViewModel
+import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.IsEditCategoryViewModel
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.NoteViewModel
 
+@RequiresApi(Build.VERSION_CODES.S)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    viewModel: NoteViewModel = hiltViewModel(),
+    myViewModel: NoteViewModel = hiltViewModel(),
     _userViewModel: UserViewModel,
     navHostController: NavHostController,
     categoryViewModel: CategoryViewModel = hiltViewModel()
@@ -147,10 +152,9 @@ fun MainScreen(
         mutableStateOf(false)
     }
 
-    val notes by viewModel.notes.collectAsState()
+    val notes by myViewModel.notes.collectAsState()
 
     val myCategoryViewModel by categoryViewModel.myCategories.collectAsState()
-    val selectedCategoryById by categoryViewModel.categoryById.collectAsState()
 
     val mainSurfaceShadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
 
@@ -162,6 +166,7 @@ fun MainScreen(
     val filteredNotes = notes.filter {
         it.categoryId == selectedCategory && !it.isDelete
     }
+    val isEditCategoryViewModel= viewModel<IsEditCategoryViewModel>()
 
     Scaffold(
         modifier = Modifier
@@ -361,7 +366,8 @@ fun MainScreen(
              */
             if (dialogForCategoryDeleting) {
                 ForDeletingCategoryDialog(
-                    onDismiss = { dialogForCategoryDeleting = false }
+                    onDismiss = { dialogForCategoryDeleting = false },
+                    isEditCategoryViewModel=isEditCategoryViewModel
                 )
             }
 

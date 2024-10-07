@@ -36,7 +36,14 @@ interface NoteDao {
     @Query("delete from MyNotes where id = :noteId")
     suspend fun deleteNoteById(noteId: Int)
 
-    @Query("select * from MyNotes where categoryId = :categoryId")
-    fun getNotesByCategoryId(categoryId: Int): Flow<List<NoteEntity>>
+    @Query("select * from MyNotes where categoryId = :categoryId and isDelete = :isDelete")
+    fun getNotesByCategoryId(categoryId: Int, isDelete: Boolean): Flow<List<NoteEntity>>
+
+    @Query("delete from MyNotes where categoryId = :categoryId")
+    suspend fun deleteNotesByCategoryId(categoryId: Int)
+
+//    @Query("select * from MyNotes where categoryId = :categoryId and isDelete = :isDelete")
+//    fun getNotesByCategoryIdAndIsDelete(categoryId: Int, isDelete: Boolean): Flow<List<NoteEntity>>
+
 
 }

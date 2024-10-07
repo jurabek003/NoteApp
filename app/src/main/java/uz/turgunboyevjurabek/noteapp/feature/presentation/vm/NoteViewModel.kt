@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.Note
+import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.DeleteNoteByCategoryIdUseCase
 import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.DeleteNoteUseCase
 import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.GetAllNotesUseCase
 import uz.turgunboyevjurabek.noteapp.feature.domein.use_case.note.GetNoteByIdUseCase
@@ -29,7 +30,8 @@ class NoteViewModel @Inject constructor(
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val getIsDeleteUseCase: IsDeleteUseCase,
-    private val getNotesByCategoryIdUseCase: GetNotesByCategoryIdUseCase
+    private val getNotesByCategoryIdUseCase: GetNotesByCategoryIdUseCase,
+    private val deleteNoteByCategoryIdUseCase: DeleteNoteByCategoryIdUseCase
 ) : ViewModel() {
 
     private val _notes = MutableStateFlow<List<Note>>(emptyList())
@@ -55,6 +57,12 @@ class NoteViewModel @Inject constructor(
     fun insertNote(note: Note) {
         viewModelScope.launch {
             insertNoteUseCase(note)
+        }
+    }
+
+    fun deleteNoteByCategoryId(categoryId: Int) {
+        viewModelScope.launch {
+            deleteNoteByCategoryIdUseCase(categoryId=categoryId)
         }
     }
 
@@ -86,9 +94,9 @@ class NoteViewModel @Inject constructor(
         }
     }
 
-    fun loadNotesByCategoryId(categoryId: Int) {
+    fun loadNotesByCategoryId(categoryId: Int, isDelete: Boolean) {
         viewModelScope.launch {
-            getNotesByCategoryIdUseCase(categoryId).collect { result ->
+            getNotesByCategoryIdUseCase(categoryId, isDelete).collect { result ->
                 _getNotesByCategoryId.value = result
             }
         }

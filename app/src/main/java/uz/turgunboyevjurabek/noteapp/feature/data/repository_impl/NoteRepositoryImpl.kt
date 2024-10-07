@@ -44,10 +44,14 @@ class NoteRepositoryImpl(private val noteDao: NoteDao) : NoteRepository {
         noteDao.deleteNoteById(noteId = noteId)
     }
 
-    override fun getNotesByCategoryId(categoryId: Int): Flow<List<Note>> {
-        return noteDao.getNotesByCategoryId(categoryId).map { noteEntities ->
+    override fun getNotesByCategoryId(categoryId: Int, isDelete: Boolean): Flow<List<Note>> {
+        return noteDao.getNotesByCategoryId(categoryId, isDelete).map { noteEntities ->
             noteEntities.map { it.toNote() }
         }
+    }
+
+    override suspend fun deleteNotesByCategoryId(categoryId: Int) {
+        noteDao.deleteNotesByCategoryId(categoryId = categoryId)
     }
 
 

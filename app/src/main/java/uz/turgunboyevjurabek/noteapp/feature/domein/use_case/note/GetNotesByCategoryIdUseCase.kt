@@ -6,7 +6,7 @@ import uz.turgunboyevjurabek.noteapp.feature.domein.repository.NoteRepository
 import javax.inject.Inject
 
 class GetNotesByCategoryIdUseCase @Inject constructor(private val noteRepository: NoteRepository) {
-    operator fun invoke(categoryId: Int): Flow<List<Note?>> {
-     return  noteRepository.getNotesByCategoryId(categoryId)
+    operator fun invoke(categoryId: Int, isDelete: Boolean): Flow<List<Note?>> {
+     return  noteRepository.getNotesByCategoryId(categoryId,isDelete)
     }
 }
