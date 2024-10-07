@@ -3,15 +3,8 @@
 package uz.turgunboyevjurabek.noteapp.feature.presentation.screens
 
 import UserViewModel
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -29,7 +22,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,16 +29,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyRow
+
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -64,14 +53,8 @@ import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.ShapeDefaults
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -96,8 +79,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.SecureFlagPolicy
@@ -116,6 +101,7 @@ import okhttp3.internal.wait
 import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.core.utils.NoteObj
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.MyCategory
+import uz.turgunboyevjurabek.noteapp.feature.presentation.components.AutoResizingText
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.CustomTab
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ForDeletingCategoryDialog
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.ModalBottomSheetUI
@@ -167,6 +153,12 @@ fun MainScreen(
         it.categoryId == selectedCategory && !it.isDelete
     }
     val isEditCategoryViewModel= viewModel<IsEditCategoryViewModel>()
+    val imageLoader = ImageLoader.Builder(context)
+        .error(R.drawable.ic_launcher_foreground)
+        .crossfade(500)
+        .placeholder(R.drawable.ic_image)
+        .memoryCachePolicy(CachePolicy.ENABLED) //Keshlash
+        .build()
 
     Scaffold(
         modifier = Modifier
@@ -179,14 +171,12 @@ fun MainScreen(
                         .wrapContentHeight(unbounded = true)
                         .graphicsLayer {
                             spotShadowColor = mainSurfaceShadowColor
-                            shadowElevation = 10f
+                            shadowElevation = 35f
                             shape = ShapeDefaults.ExtraLarge
-                        }
-                        .background(Color.Transparent),
+                        },
                     color = MaterialTheme.colorScheme.surface,
                     contentColor = contentColorFor(MaterialTheme.colorScheme.surface),
                     shape = ShapeDefaults.ExtraLarge,
-                    shadowElevation = 8.dp,
                     content = {
                         Column {
                             Spacer(modifier = Modifier.height(20.dp))
@@ -203,36 +193,33 @@ fun MainScreen(
                                 horizontalArrangement = Arrangement.SpaceAround,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
+                                Spacer(modifier = Modifier.height(20.dp))
+                                AutoResizingText(
                                     text = "Hello, ${userViewModel.value?.name}",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = MaterialTheme.typography.displaySmall.fontSize
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.8f),
+                                    style = TextStyle(
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontFamily = FontFamily.Serif,
+                                        fontSize = MaterialTheme.typography.displaySmall.fontSize
+                                    )
                                 )
-                                val imageLoader = ImageLoader.Builder(context)
-                                    .error(R.drawable.ic_launcher_foreground)
-                                    .crossfade(500)
-                                    .placeholder(R.drawable.ic_image)
-                                    .memoryCachePolicy(CachePolicy.ENABLED) //Keshlash
-                                    .build()
                                 Image(
                                     painter = rememberAsyncImagePainter(
                                         model = userViewModel.value?.image,
                                         imageLoader = imageLoader
                                     ),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(50.dp)
-                                        .clip(CircleShape)
-                                        .clickable {
-                                            navHostController.navigate("profile")
-                                        }
-                                        .border(
-                                            border = BorderStroke(1.5.dp, color = Color.Red),
-                                            shape = CircleShape
-                                        ),
-                                    contentScale = ContentScale.Crop
-                                )
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(60.dp)
+                                            .clip(CircleShape)
+                                            .border(width = 1.dp, color = Color.LightGray, shape = CircleShape)
+                                            .clickable {
+                                                navHostController.navigate("profile")
+                                            },
+                                        contentScale = ContentScale.Crop
+                                    )
+                                Spacer(modifier = Modifier.height(20.dp))
                             }
                             Spacer(modifier = Modifier.height(20.dp))
                         }
@@ -242,6 +229,8 @@ fun MainScreen(
                 ScrollableTabRow(
                     selectedTabIndex = selectedTabIndex,
                     indicator = {},
+                    divider = {},
+                    edgePadding = 0.dp,
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
@@ -252,8 +241,9 @@ fun MainScreen(
                             text = {
                                 Text(
                                     text = myCategory.name,
-                                    fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = if (selectedTabIndex == index) 20.sp else 15.sp
+                                    fontFamily = FontFamily.Serif,
+                                    fontWeight = if (selectedTabIndex == index) FontWeight.Black else FontWeight.Normal,
+                                    fontSize = if (selectedTabIndex == index) 20.sp else 14.sp
                                 )
                             },
                             modifier = Modifier
@@ -275,7 +265,7 @@ fun MainScreen(
                             .wrapContentSize()
                             .graphicsLayer {
                                 spotShadowColor = Color.Yellow
-                                shadowElevation = 30f
+                                shadowElevation = 18f
                                 shape = ShapeDefaults.Large
                             },
                         shape = ShapeDefaults.Medium,
@@ -287,7 +277,7 @@ fun MainScreen(
                             imageVector = Icons.Default.Add,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(35.dp)
                         )
                     }
 
@@ -396,19 +386,25 @@ fun MainScreen(
                     Icon(
                         imageVector = Icons.Default.Star,
                         contentDescription = null,
+                        tint = Color.White,
                         modifier = Modifier
                             .size(35.dp)
                     )
                 }
                 FloatingActionButton(
-                    modifier = Modifier
-                        .padding(bottom = 50.dp),
+                    modifier = modifier
+                        .padding(bottom = 50.dp)
+                        .graphicsLayer {
+                            spotShadowColor=Color.Green
+                            shadowElevation=7f
+                            shape = CircleShape
+                        }
+                    ,
                     onClick = {
                         isSheetOpen = true
                     },
                     shape = CircleShape,
-                    elevation = FloatingActionButtonDefaults.elevation(0.dp),
-//                                containerColor = Color.Transparent,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = null)
                 }
@@ -420,6 +416,7 @@ fun MainScreen(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = null,
+                        tint = Color.White,
                         modifier = Modifier
                             .size(35.dp)
                     )

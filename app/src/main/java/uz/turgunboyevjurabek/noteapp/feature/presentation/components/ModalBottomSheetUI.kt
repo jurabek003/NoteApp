@@ -72,7 +72,7 @@ fun ModalBottomSheetUI(
     val scroll= rememberScrollState()
     val context = LocalContext.current
     var categoryId by rememberSaveable {
-        mutableIntStateOf(1)
+        mutableIntStateOf(0)
     }
     val categoryList=ArrayList<MyCategory>()
     categoryList.addAll(categoryViewModel.myCategories.value)
@@ -125,7 +125,7 @@ fun ModalBottomSheetUI(
             ),
             modifier = modifier
                 .padding(horizontal = 12.dp)
-                .heightIn(min = 150.dp, max = 300.dp)
+                .heightIn(min = 250.dp, max = 500.dp)
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -137,23 +137,25 @@ fun ModalBottomSheetUI(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             repeat(categoryList.size) { index ->
-                OutlinedCard(
-                    onClick = {
-                        categoryId = categoryList[index].id
-                    },
-                    colors = CardDefaults.outlinedCardColors(
-                        containerColor = if (categoryList[index].id == categoryId)
-                            Color.Green
-                        else
-                            Color.Gray
-                    ),
-                    modifier=modifier
-                ) {
-                    Text(
-                        text = categoryViewModel.myCategories.value[index].name,
-                        fontWeight = FontWeight.Medium,
+                if (categoryList[index].id != 1){
+                    OutlinedCard(
+                        onClick = {
+                            categoryId = categoryList[index].id
+                        },
+                        colors = CardDefaults.outlinedCardColors(
+                            containerColor = if (categoryList[index].id == categoryId)
+                                Color.Green
+                            else
+                                Color.Gray
+                        ),
                         modifier=modifier
-                        .padding(5.dp))
+                    ) {
+                        Text(
+                            text = categoryViewModel.myCategories.value[index].name,
+                            fontWeight = FontWeight.Medium,
+                            modifier=modifier
+                                .padding(5.dp))
+                    }
                 }
             }
         }
@@ -171,17 +173,17 @@ fun ModalBottomSheetUI(
                     onDismiss()
                 },
             ) {
-                Text(text = "Close")
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = null,
                     modifier = Modifier
                 )
+                Text(text = "Close", fontWeight = FontWeight.Black)
             }
             OutlinedButton(
                 modifier = modifier,
                 onClick = {
-                    if (textName.isNotEmpty() && textDescription.isNotEmpty()) {
+                    if (textName.isNotEmpty() && textDescription.isNotEmpty() && categoryId != 0) {
                         viewModel.insertNote(
                             Note(
                                 name = textName, description = textDescription, categoryId = categoryId
@@ -193,12 +195,12 @@ fun ModalBottomSheetUI(
                     }
                 },
             ) {
-                Text(text = "Sava")
                 Icon(
                     imageVector = Icons.Default.Done,
                     contentDescription = null,
                     modifier = Modifier
                 )
+                Text(text = "Sava", fontWeight = FontWeight.Black)
             }
         }
         Spacer(modifier = Modifier.height(40.dp))

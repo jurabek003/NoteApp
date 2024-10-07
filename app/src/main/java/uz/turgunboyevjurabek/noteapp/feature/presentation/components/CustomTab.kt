@@ -38,22 +38,32 @@ fun CustomTab(
 ) {
     val rowShadowColor = if (isSystemInDarkTheme()) {
         if (selected) Color.Green else Color.White
-    } else if (selected) Color.Black else Color.White
+    } else if (selected) Color.Black else Color.Black
+
+    val myBorder = BorderStroke(
+        width = if (isSystemInDarkTheme()) {
+            if (selected) 2.dp else 0.dp
+        } else {
+            if (selected) 2.dp else 0.dp
+        }, color = if (isSystemInDarkTheme()) {
+            if (selected) Color.White else Color.Black
+        } else {
+            if (selected) Color.Black else Color.White
+        },
+    )
 
     // Custom tabni shakllantirish
     Surface(
         onClick = { onClick() },
+        border = myBorder,
         modifier = modifier
             .padding(10.dp)
             .graphicsLayer {
                 spotShadowColor = rowShadowColor
-                shadowElevation = if (selected) 30f else 10f
+                shadowElevation = if (selected) 20f else 5f
                 shape = ShapeDefaults.Large
             },
         shape = ShapeDefaults.Large,
-//        colors = CardDefaults.cardColors(if (selected) Color.Cyan else Color.White),
-//        elevation = CardDefaults.cardElevation(10.dp)
-
     ) {
         Column(
             modifier = modifier

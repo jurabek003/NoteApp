@@ -260,7 +260,7 @@ fun EditNoteScreen(
         Text(
             text = "Note Name : ",
             fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Black,
             fontSize = 15.sp,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
@@ -279,7 +279,7 @@ fun EditNoteScreen(
             textStyle = TextStyle(
                 fontSize = 20.sp,
                 fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Black,
+                fontWeight = FontWeight.SemiBold,
             ),
         )
         Spacer(modifier = Modifier.height(40.dp))
@@ -306,7 +306,7 @@ fun EditNoteScreen(
             textStyle = TextStyle(
                 fontSize = 20.sp,
                 fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Black,
+                fontWeight = FontWeight.SemiBold,
             ),
         )
 
