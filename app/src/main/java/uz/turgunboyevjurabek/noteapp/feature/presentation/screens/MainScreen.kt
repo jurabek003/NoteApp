@@ -194,15 +194,18 @@ fun MainScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Spacer(modifier = Modifier.height(20.dp))
-                                AutoResizingText(
+                                Text(
                                     text = "Hello, ${userViewModel.value?.name}",
-                                    modifier = Modifier
-                                        .fillMaxWidth(0.8f),
                                     style = TextStyle(
                                         fontWeight = FontWeight.ExtraBold,
                                         fontFamily = FontFamily.Serif,
-                                        fontSize = MaterialTheme.typography.displaySmall.fontSize
-                                    )
+                                        fontSize = MaterialTheme.typography.displaySmall.fontSize,
+                                    ),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier
+                                        .padding(start = 10.dp)
+                                        .fillMaxWidth(0.8f),
                                 )
                                 Image(
                                     painter = rememberAsyncImagePainter(
@@ -213,7 +216,11 @@ fun MainScreen(
                                         modifier = Modifier
                                             .size(60.dp)
                                             .clip(CircleShape)
-                                            .border(width = 1.dp, color = Color.LightGray, shape = CircleShape)
+                                            .border(
+                                                width = 1.dp,
+                                                color = Color.LightGray,
+                                                shape = CircleShape
+                                            )
                                             .clickable {
                                                 navHostController.navigate("profile")
                                             },
@@ -395,11 +402,10 @@ fun MainScreen(
                     modifier = modifier
                         .padding(bottom = 50.dp)
                         .graphicsLayer {
-                            spotShadowColor=Color.Green
-                            shadowElevation=7f
+                            spotShadowColor = Color.Green
+                            shadowElevation = 7f
                             shape = CircleShape
-                        }
-                    ,
+                        },
                     onClick = {
                         isSheetOpen = true
                     },

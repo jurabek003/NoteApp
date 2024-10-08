@@ -89,11 +89,13 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -109,6 +111,7 @@ import kotlinx.coroutines.launch
 import uz.turgunboyevjurabek.noteapp.R
 import uz.turgunboyevjurabek.noteapp.core.MyApp
 import uz.turgunboyevjurabek.noteapp.feature.domein.madels.User
+import uz.turgunboyevjurabek.noteapp.feature.presentation.components.AutoResizingText
 import uz.turgunboyevjurabek.noteapp.feature.presentation.components.navigation_anim.myEnterTransition
 import uz.turgunboyevjurabek.noteapp.feature.presentation.vm.IsEditProfileViewModel
 import uz.turgunboyevjurabek.noteapp.ui.theme.NoteAppTheme
@@ -134,119 +137,85 @@ fun ProfileScreen(
         isEdit = editProfile.value
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                modifier = Modifier
-                    .shadow(
-                        elevation = 5.dp,
-                        shape = ShapeDefaults.ExtraLarge,
-                        spotColor = shadowColor
-                    ),
-                scrollBehavior = scrollBehavior,
-                title = {
-                    AnimatedVisibility(
-                        visible = !isEdit,
-                        enter = slideInVertically(
-                            tween(700),
-                            initialOffsetY = { _ -> 200 }
-                        ),
-                        exit = slideOutVertically(
-                            tween(600),
-                            targetOffsetY = { _ -> 200 }
-                        ),
-                        content = {
-                            Text(
-                                text = "ProfileScreen",
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif
-                            )
-                        }
+    Scaffold(topBar = {
+        TopAppBar(modifier = Modifier.shadow(
+            elevation = 5.dp, shape = ShapeDefaults.ExtraLarge, spotColor = shadowColor
+        ), scrollBehavior = scrollBehavior, title = {
+            AnimatedVisibility(visible = !isEdit,
+                enter = slideInVertically(tween(700), initialOffsetY = { _ -> 200 }),
+                exit = slideOutVertically(tween(600), targetOffsetY = { _ -> 200 }),
+                content = {
+                    Text(
+                        text = "ProfileScreen",
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
                     )
-                    AnimatedVisibility(
-                        visible = isEdit,
-                        enter = slideInVertically(
-                            tween(700),
-                            initialOffsetY = { _ -> 100 }
-                        ),
-                        exit = slideOutVertically(
-                            tween(600),
-                            targetOffsetY = { _ -> 100 }
-                        ),
-                        content = {
-                            Text(
-                                text = "EditProfileScreen",
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Serif
-                            )
-                        }
+                })
+            AnimatedVisibility(visible = isEdit,
+                enter = slideInVertically(tween(700), initialOffsetY = { _ -> 100 }),
+                exit = slideOutVertically(tween(600), targetOffsetY = { _ -> 100 }),
+                content = {
+                    Text(
+                        text = "EditProfileScreen",
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
                     )
+                })
 
-                },
-                navigationIcon = {
+        }, navigationIcon = {
+            IconButton(onClick = {
+                navHostController.popBackStack()
+            }) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+            }
+        }, actions = {
+            AnimatedVisibility(visible = !isEdit,
+                enter = slideInVertically(),
+                exit = slideOutVertically(),
+                content = {
                     IconButton(onClick = {
-                        navHostController.popBackStack()
+                        isEditProfileViewModel.setIsEditProfile(true)
                     }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = null)
                     }
-                },
-                actions = {
-                    AnimatedVisibility(
-                        visible = !isEdit,
-                        enter = slideInVertically(),
-                        exit = slideOutVertically(),
-                        content = {
-                            IconButton(onClick = {
-                                isEditProfileViewModel.setIsEditProfile(true)
-                            }) {
-                                Icon(imageVector = Icons.Default.Edit, contentDescription = null)
-                            }
-                        }
-                    )
-                    AnimatedVisibility(
-                        visible = isEdit,
-                        enter = slideInVertically(),
-                        exit = slideOutVertically(),
-                        content = {
-                            IconButton(onClick = {
-                                isEditProfileViewModel.setIsEditProfile(false)
-                            }) {
-                                Icon(imageVector = Icons.Default.Done, contentDescription = null)
-                            }
-                        }
-                    )
+                })
+            AnimatedVisibility(visible = isEdit,
+                enter = slideInVertically(),
+                exit = slideOutVertically(),
+                content = {
+                    IconButton(onClick = {
+                        isEditProfileViewModel.setIsEditProfile(false)
+                    }) {
+                        Icon(imageVector = Icons.Default.Done, contentDescription = null)
+                    }
+                })
 
-                }
-            )
-        },
-        content = {
-            val scrollState = rememberScrollState()
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
-                    .verticalScroll(state = scrollState),
-            ) {
-                AnimatedVisibility(visible = !isEdit) {
-                    DefaultProfileScreen(
-                        userViewModel = userViewModel,
-                        navHostController = navHostController,
-                        isEditProfileViewModel = isEditProfileViewModel
-                    )
-                }
-                AnimatedVisibility(visible = isEdit) {
-                    EditProfileScreen(
-                        user = User(
-                            userViewModel.userState.value?.name,
-                            userViewModel.userState.value?.image
-                        ),
-                        isEditProfileViewModel = isEditProfileViewModel,
-                        userViewModel = userViewModel
-                    )
-                }
+        })
+    }, content = {
+        val scrollState = rememberScrollState()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .verticalScroll(state = scrollState),
+        ) {
+            AnimatedVisibility(visible = !isEdit) {
+                DefaultProfileScreen(
+                    userViewModel = userViewModel,
+                )
+            }
+            AnimatedVisibility(visible = isEdit) {
+                EditProfileScreen(
+                    user = User(
+                        userViewModel.userState.value?.name,
+                        userViewModel.userState.value?.image
+                    ),
+                    isEditProfileViewModel = isEditProfileViewModel,
+                    userViewModel = userViewModel
+                )
             }
         }
-    )
+    })
 
 }
 
@@ -254,28 +223,18 @@ fun ProfileScreen(
 @Composable
 fun DefaultProfileScreen(
     userViewModel: UserViewModel,
-    navHostController: NavHostController,
-    isEditProfileViewModel: IsEditProfileViewModel
 ) {
-    val userState = userViewModel.userState.collectAsState()
-
     val user = userViewModel.userState.value
 
     ConstraintLayout(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
-        val (profileImage, surface, navigationIcon, editIcon) = createRefs()
-        val imageLoading = ImageLoader.Builder(LocalContext.current)
-            .crossfade(800)
-            .placeholder(R.drawable.ic_account)
-            .error(R.drawable.ic_launcher_foreground)
-            .build()
-        Image(
-            painter = rememberAsyncImagePainter(
-                model = user?.image,
-                imageLoader = imageLoading
-            ),
+        val (profileImage, surface, navigationIcon, editIcon,text) = createRefs()
+        val imageLoading = ImageLoader.Builder(LocalContext.current).crossfade(800)
+            .placeholder(R.drawable.ic_account).error(R.drawable.ic_launcher_foreground).build()
+        Image(painter = rememberAsyncImagePainter(
+            model = user?.image, imageLoader = imageLoading
+        ),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -284,41 +243,38 @@ fun DefaultProfileScreen(
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }
-        )
+                })
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
+                .wrapContentHeight(unbounded = true)
                 .constrainAs(surface) {
                     top.linkTo(profileImage.bottom, margin = (-40).dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                },
-            shape = RoundedCornerShape(
-                topEnd = 30.dp,
-                topStart = 30.dp
-            )
+                }, shape = RoundedCornerShape(
+                topEnd = 30.dp, topStart = 30.dp
+            ),
         ) {
-
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
+                Modifier
+                .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = user?.name.toString(),
+                AutoResizingText(
+                    text = user?.name.toString(),
+                    style = TextStyle(
                         fontSize = MaterialTheme.typography.displaySmall.fontSize,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif,
-                        modifier = Modifier
-                            .padding(top = 7.dp)
-                    )
-                }
+                        textAlign = TextAlign.Center
+                    ),
+                    boxWidth = 0.9,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 22.dp)
+                )
             }
         }
 
@@ -328,14 +284,12 @@ fun DefaultProfileScreen(
 
 @Composable
 fun EditProfileScreen(
-    user: User,
-    isEditProfileViewModel: IsEditProfileViewModel,
-    userViewModel: UserViewModel
+    user: User, isEditProfileViewModel: IsEditProfileViewModel, userViewModel: UserViewModel
 ) {
 
     val isEditProfile = isEditProfileViewModel.editProfile.collectAsState()
 
-    var changeImage by rememberSaveable {
+    val changeImage by rememberSaveable {
         mutableStateOf(user.image)
     }
     var changeName by rememberSaveable {
@@ -352,32 +306,27 @@ fun EditProfileScreen(
     /**
      * Rasm tanlash uchun launcher
      */
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            uri?.let {
-                // Doimiy ruxsat olish
-                context.contentResolver.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-                selectedImageUri = it
-            }
-        }
-    )
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent(),
+            onResult = { uri: Uri? ->
+                uri?.let {
+                    // Doimiy ruxsat olish
+                    context.contentResolver.takePersistableUriPermission(
+                        it, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    selectedImageUri = it
+                }
+            })
 
 
-    val imageLoading = ImageLoader.Builder(LocalContext.current)
-        .crossfade(400)
-        .placeholder(R.drawable.ic_account)
-        .error(R.drawable.ic_launcher_foreground)
-        .build()
+    val imageLoading =
+        ImageLoader.Builder(LocalContext.current).crossfade(400).placeholder(R.drawable.ic_account)
+            .error(R.drawable.ic_launcher_foreground).build()
 
     Column(
         Modifier
             .fillMaxSize()
-            .padding(top = 100.dp),
-        verticalArrangement = Arrangement.Center
+            .padding(top = 100.dp), verticalArrangement = Arrangement.Center
     ) {
         val shadowColor = if (isSystemInDarkTheme()) Color.Green else Color.Red
         Surface(
@@ -388,8 +337,7 @@ fun EditProfileScreen(
                     spotShadowColor = shadowColor
                     shadowElevation = 30f
                     shape = RoundedCornerShape(50.dp)
-                },
-            shape = RoundedCornerShape(50.dp)
+                }, shape = RoundedCornerShape(50.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -397,27 +345,22 @@ fun EditProfileScreen(
                 Spacer(modifier = Modifier.height(50.dp))
                 val myBrush = Brush.linearGradient(
                     listOf(
-                        Color.Red,
-                        Color.Blue
+                        Color.Red, Color.Blue
                     )
                 )
-                Box(
-                    modifier = Modifier
-                        .size(220.dp)
-                        .graphicsLayer {
-                            spotShadowColor = shadowColor
-                            shadowElevation = 50f
-                            shape = RoundedCornerShape(110.dp)
-                        }
-                        .clip(RoundedCornerShape(90.dp)),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
+                Box(modifier = Modifier
+                    .size(220.dp)
+                    .graphicsLayer {
+                        spotShadowColor = shadowColor
+                        shadowElevation = 50f
+                        shape = RoundedCornerShape(110.dp)
+                    }
+                    .clip(RoundedCornerShape(90.dp)), contentAlignment = Alignment.BottomCenter) {
 
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            model = if (selectedImageUri != null) selectedImageUri else changeImage,
-                            imageLoader = imageLoading
-                        ),
+                    Image(painter = rememberAsyncImagePainter(
+                        model = if (selectedImageUri != null) selectedImageUri else changeImage,
+                        imageLoader = imageLoading
+                    ),
                         contentScale = ContentScale.Crop,
                         contentDescription = null,
                         modifier = Modifier
@@ -426,8 +369,7 @@ fun EditProfileScreen(
                             }
                             .clip(ShapeDefaults.ExtraLarge)
                             .border(3.dp, brush = myBrush, shape = RoundedCornerShape(90.dp))
-                            .fillMaxSize()
-                    )
+                            .fillMaxSize())
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -443,24 +385,19 @@ fun EditProfileScreen(
                             painter = painterResource(id = R.drawable.ic_camera),
                             contentDescription = null,
                             tint = Color.Red,
-                            modifier = Modifier
-                                .size(40.dp)
+                            modifier = Modifier.size(40.dp)
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(50.dp))
                 OutlinedTextField(
-                    value = changeName!!,
-                    onValueChange = {
+                    value = changeName!!, onValueChange = {
                         changeName = it
-                    },
-                    keyboardOptions = KeyboardOptions(
+                    }, keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Words,
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Done
-                    ),
-                    shape = ShapeDefaults.ExtraLarge,
-                    colors = OutlinedTextFieldDefaults.colors(
+                    ), shape = ShapeDefaults.ExtraLarge, colors = OutlinedTextFieldDefaults.colors(
                         unfocusedContainerColor = Color.Transparent,
                         focusedContainerColor = Color.Transparent,
                         unfocusedBorderColor = Color.DarkGray,
@@ -468,9 +405,7 @@ fun EditProfileScreen(
                         unfocusedTextColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
                         focusedTextColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
                         cursorColor = if (isSystemInDarkTheme()) Color.White else Color.Black
-                    ),
-                    modifier = Modifier
-                        .padding(horizontal = 40.dp)
+                    ), modifier = Modifier.padding(horizontal = 40.dp)
                 )
 
                 Spacer(modifier = Modifier.height(50.dp))
@@ -485,11 +420,11 @@ fun EditProfileScreen(
     LaunchedEffect(isEditProfile.value) {
         when (isEditProfile.value) {
             false -> {
-                if (selectedImageUri != null && changeName != null) {
+                if (!changeImage.isNullOrEmpty() && changeName != null) {
                     userViewModel.saveUser(
                         newUser = User(
-                            name = changeName,
-                            image = selectedImageUri.toString()
+                            name = changeName.toString().trim(),
+                            image = if (selectedImageUri == null) changeImage else selectedImageUri.toString()
                         )
                     )
                     Toast.makeText(context, "saqlandi", Toast.LENGTH_SHORT).show()

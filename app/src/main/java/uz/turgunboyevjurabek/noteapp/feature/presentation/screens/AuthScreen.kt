@@ -105,11 +105,6 @@ fun AuthScreen(
                 mutableStateOf("")
             }
 
-            Text(text = user?.name.toString())
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(text = user?.image.toString())
-            Spacer(modifier = Modifier.height(40.dp))
-
             Box(
                 modifier = Modifier
                     .size(100.dp)
@@ -187,8 +182,10 @@ fun AuthScreen(
                 onClick = {
                     if (name.isNotEmpty() && selectedImageUri.toString().isNotEmpty()){
                         Toast.makeText(context, "saqlandi", Toast.LENGTH_SHORT).show()
-//                        viewModel.clearUser()
                         viewModel.saveUser(User(name,selectedImageUri.toString()))
+                        navHostController.navigate("main"){
+                            popUpTo("splash") { inclusive = true }
+                        }
                     }
                 }
             ) {

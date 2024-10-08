@@ -6,10 +6,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 
-
 fun myExitTransition():ExitTransition {
    return slideOutHorizontally(
-        targetOffsetX = { fullWidth -> -fullWidth },
+        targetOffsetX = { fullWidth -> +fullWidth },
         animationSpec = tween(500)
     )  + fadeOut(animationSpec = tween(500))
 }
